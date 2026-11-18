@@ -1308,12 +1308,12 @@
     if (e.button) return;
     arrastrando = true; movido = false; sx = e.clientX; sy = e.clientY; ox = panX; oy = panY;
     pano.classList.remove("glide");
-    try { stage.setPointerCapture(e.pointerId); } catch (err) {}
+    /* La captura se pide recién al arrastrar: si se pide al tocar, Chrome manda el clic al pasillo y "Entrar" no responde con mouse. */
   });
   window.addEventListener("pointermove", (e) => {
     if (!arrastrando) return;
     const dx = e.clientX - sx, dy = e.clientY - sy;
-    if (!movido && Math.hypot(dx, dy) > 6) { movido = true; stage.classList.add("dragging"); $("#hint").classList.add("gone"); }
+    if (!movido && Math.hypot(dx, dy) > 6) { movido = true; stage.classList.add("dragging"); $("#hint").classList.add("gone"); try { stage.setPointerCapture(e.pointerId); } catch (err) {} }
     if (movido) { panX = ox + dx; panY = oy + dy; limitar(); }
   });
   window.addEventListener("pointerup", () => { arrastrando = false; stage.classList.remove("dragging"); setTimeout(() => (movido = false), 0); });
