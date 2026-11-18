@@ -23,7 +23,8 @@ body.en-tienda .top{background:linear-gradient(180deg,color-mix(in srgb,var(--ta
 .cartbtn.bump{animation:bump .45s}
 @keyframes bump{40%{transform:scale(1.15)}}
 .viewer{flex:1;position:relative;overflow:hidden;min-height:0}
-.stage{position:absolute;inset:0;overflow:hidden;cursor:grab;touch-action:none}
+.stage{position:absolute;inset:0;overflow:hidden;cursor:grab;touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+.stage *:not(input):not(textarea):not(select){-webkit-user-select:none;user-select:none}
 .stage.dragging{cursor:grabbing}
 .pano{position:absolute;left:0;top:0;will-change:transform}
 .pano.glide{transition:transform 1.2s cubic-bezier(.22,.8,.3,1)}

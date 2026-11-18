@@ -567,7 +567,9 @@
         panoW = Math.max(sw * (4 / targetBays), sh * aspect * 1.02);
         panoH = panoW / aspect;
         /* No recortes tanto en vertical que desaparezcan letreros y el carrito a la vez. */
-        if (panoH > sh / 0.58) { panoH = sh / 0.58; panoW = panoH * aspect; }
+        /* En pantalla apaisada (escritorio) se recorta menos en vertical para que entren el letrero colgante y el carrito. */
+        const visV = sw > sh ? 0.70 : 0.58;
+        if (panoH > sh / visV) { panoH = sh / visV; panoW = panoH * aspect; }
       } else {
         panoW = Math.max(sh * aspect, sw * 1.18);
         panoH = panoW / aspect;
@@ -624,6 +626,9 @@
     if (escena.tipo === "pasillo" && panoH > sh) {
       /* Arranca un poco más arriba para que se vean los letreros dorados; el piso se recorre en vertical. */
       panY = -panoH * 0.20;
+      /* …pero sin esconder el letrero colgante del Centro de Convenciones (con sus cables, ~7.5% de la foto). */
+      const P = PASILLOS[escena.i], col = P && P.vitrinas.find((v) => v.colgante);
+      if (col) { const topCol = (col.letrero.y - (col.letrero.h || 8) / 2 - 3.5) / 100; panY = Math.max(panY, 8 - panoH * topCol); }
     } else {
       panY = (sh - panoH) / 2;
     }
@@ -1048,8 +1053,7 @@
         spots.appendChild(b);
       });
       ajustarLetreros();
-      if (escena.i < PASILLOS.length - 1) puerta(50, 88, `Seguir al ${PASILLOS[escena.i + 1].nombre} →`, () => ir({ tipo: "pasillo", i: escena.i + 1 }, "fwd"));
-      else puerta(50, 88, `← Volver al ${PASILLOS[escena.i - 1].nombre}`, () => ir({ tipo: "pasillo", i: escena.i - 1 }, "back"));
+      /* Sin botón "Seguir al Pasillo…" en el piso: ya está "Seguir caminando" abajo a la derecha (y el aviso de deslizar lo tapaba). */
       return;
     }
     const t = tiendaActual();
