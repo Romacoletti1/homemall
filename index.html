@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Home Mall · Centro comercial virtual</title>
+<meta name="description" content="Recorre nuestro centro comercial virtual en Lima: entra a cada tienda, arma tu canasta y envíala por WhatsApp.">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#2b211b">
+<meta name="apple-mobile-web-app-title" content="Home Mall">
+<meta property="og:image" content="assets/img/marca/home-mall-logo-oficial.jpg">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/img/marca/icono-32.png">
+<link rel="apple-touch-icon" href="assets/img/marca/icono-180.png">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="preload" as="image" href="assets/img/marca/portada-home-mall.webp" type="image/webp">
+<link rel="stylesheet" href="assets/fuentes.css">
+<link rel="stylesheet" href="assets/estilos.css">
+</head>
+<body>
+<header class="top">
+  <div class="brand"><img class="bicon" src="assets/img/marca/home-mall-simbolo-claro.svg" width="20" height="34" alt=""><div><strong data-nombre></strong><small>Centro comercial virtual · Lima</small></div></div>
+  <nav class="rooms" id="roomNav" aria-label="Navegación"></nav>
+  <button class="cartbtn" id="cartBtn" aria-label="Ver mi canasta">🧺<span>Mi canasta</span><b id="cartCount" hidden>0</b></button>
+</header>
+
+<main class="viewer">
+  <div class="stage" id="stage">
+    <div class="pano" id="pano"><img id="panoImg" alt="" draggable="false"><div class="spots" id="spots"></div></div>
+    <div class="vignette"></div>
+  </div>
+  <button class="arrow prev" id="prevBtn" aria-label="Atrás">‹</button>
+  <button class="arrow next" id="nextBtn" aria-label="Siguiente"><span class="nl"><span id="nextTop">Siguiente</span><b id="nextLabel"></b></span>›</button>
+  <div class="roominfo" id="roomInfo"></div>
+  <div class="puco-hud" id="pucoHud" hidden>
+    <div class="phud-brand">
+      <span>Tecnología importada</span>
+      <b>PuCo Tech</b>
+    </div>
+    <div class="phud-cues">
+      <em class="phud-hero">10% en toda la tienda</em>
+      <em class="phud-hero phud-vol">10% extra &gt; S/ 200</em>
+      <em class="phud-hero phud-envio">Envío gratis desde S/ 200</em>
+      <em>Pago con Yape</em>
+      <em>Recojo gratis</em>
+    </div>
+    <div class="phud-act">
+      <button type="button" class="puco-super" id="pucoSuperBtn" aria-pressed="false">🔥 Súper ofertas</button>
+      <button type="button" class="puco-all" id="pucoAllBtn">Entrar al catálogo</button>
+    </div>
+  </div>
+  <section class="puco-destacados" id="pucoDestacados" hidden>
+    <button type="button" class="puco-semana" id="pucoSemana">
+      <img src="assets/img/productos/puco/semana-tripode.png" alt="Producto de la semana: Trípode C12 AI Tracking 1.8 m a S/ 129.90. Envío gratis desde S/ 200">
+      <span class="psem-badge">🔥 Producto de la semana · Envío gratis desde S/ 200</span>
+    </button>
+    <div class="puco-protas">
+      <p class="puco-protas-kicker">Protagonistas del mes</p>
+      <div class="puco-protas-row">
+        <button type="button" class="puco-prota" data-id="puco-106">
+          <span class="prota-photo"><img src="assets/img/productos/puco/puco-106.jpg" alt=""></span>
+          <span class="prota-badge">Protagonista del mes</span>
+          <span class="prota-body">
+            <strong>Ventilador de cuello GL70383</strong>
+            <b>S/ 29.90</b>
+            <small>Envío gratis desde S/ 200</small>
+          </span>
+        </button>
+        <button type="button" class="puco-prota" data-id="puco-107">
+          <span class="prota-photo"><img src="assets/img/productos/puco/puco-107.jpg" alt=""></span>
+          <span class="prota-badge">Protagonista del mes</span>
+          <span class="prota-body">
+            <strong>Aspiradora de mano GL70025</strong>
+            <b>S/ 34.90</b>
+            <small>Envío gratis desde S/ 200</small>
+          </span>
+        </button>
+      </div>
+    </div>
+  </section>
+  <div class="puco-sticky" id="pucoSticky" hidden>
+    <div class="ps-info"><span id="psCount">0 productos</span><strong id="psTotal">S/ 0.00</strong></div>
+    <button type="button" id="psComprar">Comprar ahora</button>
+  </div>
+  <div class="hint" id="hint">👆 Arrastra para mirar alrededor · toca un producto para llevarlo</div>
+  <div class="cartelera" id="cartelera" hidden>
+    <div class="c-marco">
+      <header class="c-head"><small>Turismo Médico</small><b>Cartelera de especialidades</b></header>
+      <div class="c-row" id="carteleraRow"></div>
+    </div>
+  </div>
+  <div class="eventohero" id="eventoHero" hidden>
+    <div class="eh-card">
+      <span class="eyebrow" id="ehEyebrow"></span>
+      <h2 id="ehTitulo"></h2>
+      <p class="ehsub" id="ehSub"></p>
+      <p class="ehcinta" id="ehCinta"></p>
+      <p class="ehfecha" id="ehFecha"></p>
+      <div class="ehacciones" id="ehAcciones"></div>
+    </div>
+  </div>
+  <aside class="beneficio" id="beneficioFest" hidden>
+    <span class="ben-badge">Aesthetic Fest</span>
+    <h3 id="benTitulo"></h3>
+    <p id="benTexto"></p>
+    <button type="button" class="wa" id="benWa"></button>
+  </aside>
+</main>
+
+<section class="bottom">
+  <div class="chips" id="chips"></div>
+  <button type="button" class="buzon-btn" id="buzonBtn" aria-label="Buzón de sugerencias">
+    <svg class="buzon-ico" viewBox="0 0 48 48" aria-hidden="true"><path d="M8 18l16-9 16 9v3H8v-3z" fill="#efe1c2" stroke="#9c7426" stroke-width="2" stroke-linejoin="round"/><rect x="8" y="18" width="32" height="22" rx="3" fill="#fbf5e6" stroke="#9c7426" stroke-width="2"/><rect x="17" y="22" width="14" height="2.6" rx="1.2" fill="#c9a24a"/><rect x="17.5" y="28" width="13" height="8.5" rx="1.2" fill="none" stroke="#8a6420" stroke-width="1.6"/><path d="M17.5 28l6.5 4.2L30.5 28" fill="none" stroke="#8a6420" stroke-width="1.6" stroke-linejoin="round"/></svg>
+    <span>Buzón</span>
+  </button>
+  <button class="cta" id="ctaBtn">🗺️ Directorio</button>
+</section>
+
+<div class="welcome" id="welcome">
+  <picture class="wfondo" aria-hidden="true"><source srcset="assets/img/marca/portada-home-mall.webp" type="image/webp"><img src="assets/img/marca/portada-home-mall.jpg" width="1000" height="1000" alt="" decoding="async"></picture>
+  <div class="wcard">
+    <h1 class="sr" data-nombre></h1>
+    <!-- Puerta de entrada: el logo oficial (mouse-puerta). La hoja gira y deja salir la luz dorada. -->
+    <div class="puerta" id="puerta" role="button" tabindex="0" aria-label="Abrir la puerta y entrar a Home Mall">
+      <div class="pluz" aria-hidden="true"></div>
+      <div class="phoja" aria-hidden="true">
+        <svg viewBox="297 163 206 364" preserveAspectRatio="none"><g fill="none" stroke="#B8924A" stroke-width="6.5" stroke-linecap="round">
+          <path d="M400 163v44M400 292v38"/><rect x="386" y="225" width="28" height="67" rx="14"/></g></svg>
+      </div>
+      <svg class="pmarco" viewBox="284 150 232 390" aria-hidden="true"><rect x="297" y="163" width="206" height="364" rx="103" fill="none" stroke="#B8924A" stroke-width="6.5"/></svg>
+      <button type="button" class="perilla" id="perilla" aria-label="Toca la perilla para entrar"></button>
+    </div>
+    <div class="wmarca" aria-hidden="true">HOME MALL</div>
+    <p class="phint" id="phint">Toca la perilla para entrar</p>
+    <p class="wl" data-lema></p>
+    <p class="wtxt">Camina por los pasillos, entra a cada tienda y arma tu canasta. Envías tu pedido por WhatsApp directamente a cada tienda.</p>
+    <p class="wstores" id="wStores"></p>
+    <div class="wfesta" id="wfesta">
+      <small>Centro de Convenciones Home Mall</small>
+      <b>Aesthetic Fest</b>
+      <span>11 al 23 de diciembre de 2026</span>
+      <p>Descuentos exclusivos en cada especialidad. Con preoperatorio completo: evaluación preoperatoria gratuita y luego agendas con quien quieras.</p>
+      <button type="button" class="fest-cta" id="festAvisar">Avisarme / Quiero participar</button>
+    </div>
+    <div class="wacciones"><button class="link light" id="startTour">Entrar al centro comercial →</button><button class="link light" id="wDir">Ver directorio de tiendas</button></div>
+    <button type="button" class="wbuzon" id="wBuzon" aria-label="Buzón de sugerencias">
+      <svg class="buzon-ico" viewBox="0 0 48 48" aria-hidden="true"><path d="M8 18l16-9 16 9v3H8v-3z" fill="#efe1c2" stroke="#9c7426" stroke-width="2" stroke-linejoin="round"/><rect x="8" y="18" width="32" height="22" rx="3" fill="#fbf5e6" stroke="#9c7426" stroke-width="2"/><rect x="17" y="22" width="14" height="2.6" rx="1.2" fill="#c9a24a"/><rect x="17.5" y="28" width="13" height="8.5" rx="1.2" fill="none" stroke="#8a6420" stroke-width="1.6"/><path d="M17.5 28l6.5 4.2L30.5 28" fill="none" stroke="#8a6420" stroke-width="1.6" stroke-linejoin="round"/></svg>
+      <span>Buzón de sugerencias</span>
+    </button>
+  </div>
+</div>
+
+<div class="scrim" id="scrim"></div>
+
+<aside class="layer sheet" id="directorio" aria-label="Directorio">
+  <button class="x" data-close aria-label="Cerrar">×</button>
+  <h2>Directorio</h2>
+  <div id="dirList" class="dirlist"></div>
+</aside>
+
+<aside class="layer sheet" id="turismoForm" aria-label="Solicitar tratamiento">
+  <button class="x" data-close aria-label="Cerrar">×</button>
+  <span class="eyebrow">Turismo Médico</span>
+  <h2 id="turTitulo">Solicita tu tratamiento en Perú</h2>
+  <p class="turintro" id="turIntro"></p>
+  <label>Nombre<input id="turNombre" autocomplete="name" placeholder="Tu nombre"></label>
+  <label>País de residencia<input id="turPais" autocomplete="country-name" placeholder="Ej.: Estados Unidos, España, Chile"></label>
+  <label>Tratamiento<select id="turTrat"></select></label>
+  <label>Fechas tentativas de viaje <i>(opcional)</i><input id="turFechas" placeholder="Ej.: del 10 al 24 de marzo"></label>
+  <label>Detalle <i>(opcional)</i><textarea id="turDetalle" rows="3" placeholder="Cuéntanos qué necesitas"></textarea></label>
+  <p class="err" id="turErr"></p>
+  <button type="button" class="wa" id="turEnviar">Enviar solicitud por WhatsApp</button>
+  <p class="fine">Te ponemos en contacto con especialistas y coordinamos tu visita. Home Mall no realiza procedimientos médicos.</p>
+</aside>
+
+<aside class="layer sheet standficha" id="standFicha" aria-label="Stand disponible">
+  <button class="x" data-close aria-label="Cerrar">×</button>
+  <span class="eyebrow">Aesthetic Fest · Feria de Estética</span>
+  <h2 id="stNombre">Stand disponible</h2>
+  <p id="stDesc"></p>
+  <p class="ehfecha" id="stFecha">Fecha por anunciar</p>
+  <button type="button" class="wa" id="stWa">Quiero un stand</button>
+  <p class="fine">Home Mall te contacta para coordinar tu espacio. Fecha por anunciar.</p>
+</aside>
+
+<aside class="layer sheet standinterior" id="standRoma" aria-label="Interior del stand Dra. Roma Coletti">
+  <button class="x" data-close aria-label="Cerrar">×</button>
+  <div class="si-frame">
+    <header class="si-head">
+      <span class="eyebrow">Aesthetic Fest · Stand oficial</span>
+      <h2>Dra. Roma Coletti</h2>
+      <p class="srub">Cirugía Plástica · Contorno Corporal</p>
+    </header>
+    <div class="rplayer" id="standRomaPlayer"></div>
+    <div class="rlista" id="standRomaLista" hidden></div>
+    <div class="si-actions">
+      <button type="button" class="primary gold" id="stRomaServicios">Ver servicios del consultorio</button>
+      <button type="button" class="wa" id="stRomaWa">Escribir por WhatsApp</button>
+    </div>
+    <p class="fine">CMP 60940 · RNE 30051. No se publican imágenes de pacientes.</p>
+  </div>
+</aside>
+
+<aside class="layer sheet ledplayer" id="pantallaCentral" aria-label="Pantalla central">
+  <button class="x" data-close aria-label="Cerrar">×</button>
+  <span class="eyebrow">Pantalla central · Aesthetic Fest</span>
+  <h2 id="ledTitulo">Videos musicales</h2>
+  <div class="led-stage"><iframe id="ledIframe" title="Video oficial" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen" allowfullscreen></iframe></div>
+  <div class="led-pl" id="ledPlaylist"></div>
+  <p class="fine">Reproducción oficial de YouTube. Home Mall no descarga ni aloja estos videos.</p>
+</aside>
+
+<aside class="layer sheet posterficha" id="posterFicha" aria-label="Especialidad">
+  <button class="x" data-close aria-label="Cerrar">×</button>
+  <div class="pf-cartel">
+    <div class="poster static" aria-hidden="true">
+      <span class="pfoco"><span class="pbulbs"></span><span class="pimg"><img id="pfImg" alt=""></span></span>
+    </div>
+  </div>
+  <div class="pf-body">
+    <span class="eyebrow">Turismo Médico</span>
+    <h2 id="pfNombre"></h2>
+    <p class="pfnota" id="pfNota" hidden></p>
+    <p id="pfDesc"></p>
+    <b class="pfcotizar">Cotizar</b>
+    <button type="button" class="wa" id="pfContacto">Solicitar contacto</button>
+    <p class="fine">Home Mall te pone en contacto con especialistas. No realizamos los procedimientos médicos.</p>
+  </div>
+</aside>
+
+<aside class="layer sheet secretosheet" id="secreto" aria-label="Adelantamos tu cita para la visa">
+  <button class="x" data-close aria-label="Cerrar">×</button>
+  <span class="eyebrow">🗝️ Detrás de la puerta</span>
+  <h2 id="secTitulo">Adelantamos tu cita para la visa</h2>
+  <div id="secLista"></div>
+  <p class="secaviso" id="secAviso"></p>
+</aside>
+
+<aside class="layer modal-alq" id="alquiler" aria-label="Local en alquiler" role="dialog">
+  <button class="x" data-close aria-label="Cerrar">×</button>
+  <img class="alqlogo" src="assets/img/marca/home-mall-simbolo.svg" width="26" height="44" alt="">
+  <div class="alqsign" id="alqSign">Se alquila</div>
+  <h2 id="alqTitulo">¿Quieres tu tienda en Home Mall?</h2>
+  <p id="alqTexto">Este local está disponible.</p>
+  <div class="alqcinta" id="alqCinta" hidden></div>
+  <div class="planes" id="alqPlanes"></div>
+  <p class="alqinst" id="alqInst" hidden></p>
+  <button type="button" class="wa" id="alqWa">Consultar por WhatsApp</button>
+</aside>
+
+<aside class="layer sheet modal-buzon" id="buzon" aria-label="Buzón de sugerencias" role="dialog">
+  <button class="x" data-close aria-label="Cerrar">×</button>
+  <div class="buzon-head">
+    <svg class="buzon-ico lg" viewBox="0 0 48 48" aria-hidden="true"><path d="M8 18l16-9 16 9v3H8v-3z" fill="#efe1c2" stroke="#9c7426" stroke-width="2" stroke-linejoin="round"/><rect x="8" y="18" width="32" height="22" rx="3" fill="#fbf5e6" stroke="#9c7426" stroke-width="2"/><rect x="17" y="22" width="14" height="2.6" rx="1.2" fill="#c9a24a"/><rect x="17.5" y="28" width="13" height="8.5" rx="1.2" fill="none" stroke="#8a6420" stroke-width="1.6"/><path d="M17.5 28l6.5 4.2L30.5 28" fill="none" stroke="#8a6420" stroke-width="1.6" stroke-linejoin="round"/></svg>
+    <h2>Buzón de sugerencias</h2>
+  </div>
+  <p class="buzon-intro">Cuéntanos cómo mejorar Home Mall. Enviamos tu mensaje por WhatsApp y dejamos una copia en este dispositivo.</p>
+  <label>Tu opinión<textarea id="bzOpinion" rows="3" placeholder="¿Qué te pareció tu visita?"></textarea></label>
+  <label>¿Qué te gustaría encontrar en Home Mall?<textarea id="bzDeseo" rows="3" placeholder="Tiendas, servicios, eventos…"></textarea></label>
+  <label>Nombre <i>(opcional)</i><input id="bzNombre" autocomplete="name" placeholder="Tu nombre"></label>
+  <label>Contacto <i>(opcional)</i><input id="bzContacto" autocomplete="tel" placeholder="WhatsApp o correo"></label>
+  <p class="err" id="bzErr"></p>
+  <button type="button" class="wa" id="bzEnviar">Enviar sugerencia por WhatsApp</button>
+</aside>
+
+<aside class="layer sheet" id="buscador" aria-label="Buscar examen">
+  <button class="x" data-close aria-label="Cerrar">×</button>
+  <h2>Buscar examen</h2>
+  <label class="bq"><span aria-hidden="true">🔎</span><input id="bQ" type="search" placeholder="Buscar examen… (ej. azúcar, colesterol, TSH)" autocomplete="off" aria-label="Buscar examen"></label>
+  <div class="bcats" id="bCats"></div>
+  <p class="bcount" id="bCount"></p>
+  <ul class="bresults" id="bRes"></ul>
+</aside>
+
+<aside class="layer sheet" id="panel" aria-label="Producto">
+  <button class="x" data-close aria-label="Cerrar">×</button>
+  <div class="pimg"><img id="pImg" alt=""><div class="pgal" id="pGal" hidden></div></div>
+  <div class="pbody">
+    <span class="eyebrow" id="pStore"></span>
+    <span class="p-semana-badge" id="pSemanaBadge" hidden>🔥 Producto de la semana · Envío gratis desde S/ 200</span>
+    <h2 id="pName"></h2>
+    <div class="price" id="pPrice"></div>
+    <em class="ejemplo" id="pEj" hidden>Precio de ejemplo</em>
+    <p id="pDesc"></p>
+    <ul class="pspecs" id="pSpecs" hidden></ul>
+    <div class="incluye" id="pIncluye" hidden></div>
+    <div class="trow" id="tRow" hidden><span>Talla</span><div class="tallas" id="pTallas"></div><p class="err" id="tErr"></p></div>
+    <div class="qrow" id="qRow"><span>Cantidad</span>
+      <div class="qty"><button id="qMinus" aria-label="Menos">−</button><b id="pQty">1</b><button id="qPlus" aria-label="Más">+</button></div>
+      <strong id="pSub"></strong></div>
+    <button class="primary" id="addBtn">Agregar a la canasta</button>
+    <button class="link" id="askBtn">Consultar por WhatsApp</button>
+    <button class="primary gold" id="citaBtn" hidden>✦ Agenda tu evaluación</button>
+    <p class="fine" id="citaNote" hidden>Cada caso se define en una evaluación médica personalizada.</p>
+  </div>
+</aside>
+
+<aside class="layer sheet luxl" id="pagoServicio" aria-label="Pagar servicio">
+  <button class="x" data-close aria-label="Cerrar">×</button>
+  <h2 id="spTitulo">Bichectomía</h2>
+  <div class="pgres"><strong>Incluye</strong><ul class="spinc" id="spIncluye"></ul><span>La fecha se coordina contigo por WhatsApp después del pago.</span></div>
+  <div id="spCheck">
+    <h4 class="spch">Antes de pagar, confirma que es para ti</h4>
+    <div class="reqs" id="spReqs"></div>
+    <div class="noapto" id="spNoApto" hidden>
+      <strong id="spNoTit"></strong><p id="spNoTxt"></p>
+      <button class="wa" id="spNoWa" type="button">Consultar por WhatsApp</button>
+    </div>
+    <button class="primary gold" id="spPagar" type="button" disabled>Pagar</button>
+    <p class="fine" id="spPagarNota">Responde «Sí» a las 3 preguntas para continuar al pago.</p>
+  </div>
+  <div id="spPago" hidden>
+  <div class="pgmonto"><span>Total a pagar</span><strong id="spMonto"></strong></div>
+  <p class="fine spdev" id="spDev"></p>
+  <div class="pgbox" id="spTarjetaBox" hidden>
+    <h4>Tarjeta</h4>
+    <button class="primary" id="spTarjeta" type="button">Pagar con tarjeta</button>
+    <div id="spTarjetaListo" hidden>
+      <button class="wa" id="spYaPagueTarjeta" type="button">Ya pagué – enviar comprobante por WhatsApp</button>
+    </div>
+  </div>
+  <div class="pgbox" id="spYapeBox">
+    <h4>Yape</h4>
+    <p class="yape">Yapea <b id="spYapeMonto"></b> al <b id="spYapeNum"></b> <button type="button" class="link" id="spCopiar">Copiar</button></p>
+    <p class="fine l" id="spYapeTit"></p>
+    <img id="spQR" class="qr" alt="QR de Yape" hidden>
+    <input id="spOperacion" placeholder="N° de operación de Yape (opcional)">
+    <button class="wa" id="spYaPague" type="button">Ya pagué – enviar comprobante por WhatsApp</button>
+  </div>
+  <button class="link" id="spAtras" type="button">← Revisar mis respuestas</button>
+  </div>
+  <button class="link" id="spConsultar" type="button">¿Dudas? Consultar por WhatsApp</button>
+  <button class="link" id="spVolver" type="button">← Volver</button>
+</aside>
+
+<aside class="layer sheet qv" id="pucoQV" aria-label="Vista rápida">
+  <button class="x" data-close aria-label="Cerrar">×</button>
+  <div class="qv-img"><img id="qvImg" alt=""></div>
+  <div class="qv-body">
+    <span class="qv-so" id="qvSo" hidden>🔥 Súper oferta</span>
+    <h2 id="qvName"></h2>
+    <div class="price" id="qvPrice"></div>
+    <p class="qv-nota" id="qvNota" hidden></p>
+    <button class="primary" id="qvAdd" type="button">Agregar a la canasta</button>
+    <button class="link" id="qvDetalle" type="button">Ver ficha completa</button>
+  </div>
+</aside>
+
+<aside class="layer drawer" id="cart" aria-label="Mi canasta">
+  <button class="x" data-close aria-label="Cerrar">×</button>
+  <h2>Mi canasta</h2>
+  <div class="citems" id="cartItems"></div>
+  <div class="ctotal"><span>Total</span><strong id="cartTotal">S/ 0.00</strong></div>
+  <div id="pucoShipBox" class="puco-ship" hidden>
+    <div class="puco-ship-line dto" id="pucoVolLine" hidden><span id="pucoVolLabel">Descuento compra &gt; S/ 200 (-10%)</span><strong id="pucoVolMonto"></strong></div>
+    <div class="puco-ship-prog vol" id="pucoVolProg" hidden>
+      <div class="bar"><i id="pucoVolBar"></i></div>
+      <p id="pucoVolHint"></p>
+    </div>
+    <p class="puco-semana-nota" id="pucoSemanaNota" hidden>El producto de la semana ya tiene su precio especial</p>
+    <div class="puco-ship-line"><span id="pucoShipLabel">Envío</span><strong id="pucoShipMonto"></strong></div>
+    <div class="puco-ship-prog" id="pucoShipProg" hidden>
+      <div class="bar"><i id="pucoShipBar"></i></div>
+      <p id="pucoShipHint"></p>
+    </div>
+    <div class="puco-ship-line tot" id="pucoShipTotLine" hidden><span>Total con envío</span><strong id="pucoShipTot"></strong></div>
+  </div>
+  <form id="checkout" class="checkout" novalidate onsubmit="return false">
+    <div id="ckForm">
+      <h3>Datos del pedido</h3>
+      <label>Nombre<input id="cNombre" autocomplete="name" placeholder="Tu nombre"></label>
+      <label>Celular / WhatsApp<input id="cCelular" type="tel" inputmode="numeric" maxlength="9" autocomplete="tel" placeholder="9 dígitos (Perú)"></label>
+      <fieldset class="seg-envio">
+        <legend>¿Cómo lo recibes?</legend>
+        <label class="opt"><input type="radio" name="cEnvio" value="delivery" checked> Delivery</label>
+        <label class="opt"><input type="radio" name="cEnvio" value="recojo"> Recojo</label>
+      </fieldset>
+      <div id="cDeliveryFields">
+        <label>Distrito / dirección<select id="cDistrito"><option value="">Elige tu distrito</option></select></label>
+        <input id="cDistritoOtro" placeholder="Escribe tu distrito" hidden>
+        <label>Dirección<input id="cDireccion" autocomplete="street-address" placeholder="Av. / Calle, número"></label>
+        <label>Referencia <em>(opcional)</em><input id="cReferencia" placeholder="Ej.: edificio blanco, portería"></label>
+      </div>
+      <label>Notas <em>(opcional)</em><input id="cNota" placeholder="Ej.: entregar después de las 6 pm"></label>
+      <p class="err" id="formErr"></p>
+      <p class="multi" id="multiNote"></p>
+      <div id="sendBtns" class="sendbtns"></div>
+      <p class="fine">Disponibilidad y costo de delivery se confirman por WhatsApp con cada tienda.</p>
+    </div>
+    <div id="ckPago" hidden>
+      <button type="button" class="link" id="ckVolver">← Revisar datos</button>
+      <h3>Pagar tu pedido</h3>
+      <p class="pedido-n">Pedido <b id="ckPedidoN"></b></p>
+      <div class="pgmonto"><span>Total a pagar</span><strong id="ckMonto"></strong></div>
+      <div class="pgres" id="ckResumen"></div>
+      <div class="pgbox" id="ckYapeBox">
+        <h4>Yape / Plin</h4>
+        <p class="yape" id="ckYapeTxt"></p>
+        <p class="fine l" id="ckYapeTit"></p>
+        <img id="ckQR" class="qr" alt="QR de Yape / Plin" hidden>
+      </div>
+      <button class="wa" id="ckYaPague" type="button">Ya pagué – enviar pedido por WhatsApp</button>
+      <p class="fine">En WhatsApp adjunta la captura de tu pago para que confirmemos tu pedido.</p>
+    </div>
+  </form>
+  <div class="crow"><button class="link" id="keepShopping">← Seguir recorriendo</button><button class="link" id="clearCart">Vaciar canasta</button></div>
+</aside>
+
+<!-- Consultorio: agenda de videoconsulta -->
+<aside class="layer sheet luxl" id="agenda" aria-label="Agenda tu videoconsulta">
+  <button class="x" data-close aria-label="Cerrar">×</button>
+  <div class="advhead"><span class="avatar">✦</span><div><strong>Agenda tu videoconsulta</strong><small>Dra. Roma Coletti · Cirugía Plástica</small></div></div>
+  <div id="agForm">
+    <p class="step">1 · ¿Dónde te encuentras?</p>
+    <div class="seg" id="aRegion"><button type="button" data-region="peru" class="on">🇵🇪 En Perú</button><button type="button" data-region="extranjero">🌎 En el extranjero</button></div>
+    <p class="step">2 · Tipo de videoconsulta</p>
+    <div class="tipos" id="aTipos"></div>
+    <p class="step">3 · Tus datos</p>
+    <div class="fields">
+      <label>Nombre completo<input id="aNombre" autocomplete="name" placeholder="Tu nombre y apellido"></label>
+      <label>Teléfono / WhatsApp<input id="aTel" type="tel" autocomplete="tel" placeholder="Ej.: 987 654 321 o +1 305…"></label>
+      <label>Email <em>(opcional)</em><input id="aEmail" type="email" autocomplete="email" placeholder="tu@correo.com"></label>
+      <label>Procedimiento de interés<select id="aServicio"></select></label>
+    </div>
+    <p class="err" id="agErr"></p>
+    <button class="primary gold" id="aEnviar" type="button">Continuar al pago</button>
+    <p class="fine">Primero se realiza el pago. Luego envías tu comprobante por WhatsApp y <b>coordinamos contigo la fecha y la hora por WhatsApp</b>; por ahí también te enviamos el enlace de Zoom.</p>
+  </div>
+  <div id="agPago" hidden>
+    <p class="step">Pago de tu videoconsulta</p>
+    <div class="pgres" id="pgResumen"></div>
+    <div class="pgmonto"><span>Total a pagar</span><strong id="pgMonto"></strong></div>
+    <div class="pgbox" id="pgEnlaceBox">
+      <h4>💳 Tarjeta, Apple Pay o PayPal</h4>
+      <p class="fine l" id="pgEnlaceNota"></p>
+      <button class="primary" id="pgEnlace" type="button">Pagar ahora (se abre PayPal)</button>
+      <div id="pgEnlaceListo" hidden>
+        <p class="fine l">¿Ya completaste el pago? Toma una captura del comprobante y envíanosla:</p>
+        <input id="pgOperacionEnlace" placeholder="N° de operación / transacción (opcional)">
+        <button class="wa" id="pgYaPagueEnlace" type="button">Ya pagué – enviar comprobante por WhatsApp</button>
+      </div>
+    </div>
+    <div class="pgbox" id="pgYapeBox">
+      <h4>📱 Yape (desde Perú)</h4>
+      <p class="yape">Yapea <b id="pgYapeMonto"></b> al <b id="pgYapeNum"></b> <button type="button" class="link" id="pgCopiar">Copiar</button></p>
+      <p class="fine l" id="pgYapeTit"></p>
+      <img id="pgQR" class="qr" alt="QR de Yape" hidden>
+      <input id="pgOperacion" placeholder="N° de operación de Yape (opcional)">
+      <button class="wa" id="pgYaPague" type="button">Ya pagué – enviar comprobante por WhatsApp</button>
+    </div>
+    <p class="fine" id="pgNinguno" hidden>Escríbenos por WhatsApp para coordinar tu pago.</p>
+    <p class="fine">También puedes pagar en <a id="pgAlt" href="https://draromacoletti.com/pago" target="_blank" rel="noopener">draromacoletti.com/pago</a>.</p>
+    <p class="err" id="pgErr"></p>
+    <button class="link" id="pgVolver" type="button">← Cambiar datos</button>
+  </div>
+  <div id="agOk" hidden class="ok">
+    <span class="big">✦</span>
+    <h3>¡Gracias! Recibimos tu solicitud</h3>
+    <p><b>Te confirmaremos tu cita por WhatsApp</b>: ahí coordinamos la fecha y la hora y te enviamos el enlace de Zoom.</p>
+    <p class="codigo">Tu código: <b id="okCodigo"></b></p>
+    <p class="fine" id="okDetalle"></p>
+    <a class="walink" id="okWa" target="_blank" rel="noopener">¿No se abrió WhatsApp? Toca aquí</a>
+    <button class="primary gold" id="okEspera" type="button">Ir a la sala de espera virtual</button>
+  </div>
+</aside>
+
+<!-- Consultorio: servicios -->
+<aside class="layer sheet luxl" id="servicios" aria-label="Servicios">
+  <button class="x" data-close aria-label="Cerrar">×</button>
+  <h2>Servicios</h2>
+  <p class="fine l">Dra. Roma Coletti · Cirugía de contorno corporal, postoperatorio y exámenes.</p>
+  <div id="servList" class="servlist"></div>
+  <p class="fine">Tus resultados se tratan de forma confidencial.</p>
+</aside>
+
+<!-- Consultorio: sala de espera virtual (pantalla completa) -->
+<div class="layer espera" id="espera" aria-label="Sala de espera virtual">
+  <div class="ecard">
+    <button class="x" id="eSalir" aria-label="Salir">×</button>
+    <span class="big">✦</span>
+    <p class="step">Sala de espera virtual</p>
+    <div id="eLogin">
+      <h2>Bienvenida(o)</h2>
+      <p>Ingresa con tu nombre y pega el enlace de Zoom que te enviamos por WhatsApp.</p>
+      <input id="eNombre" placeholder="Tu nombre completo" autocomplete="name">
+      <input id="eZoomUrl" type="url" inputmode="url" placeholder="Enlace de Zoom (https://…zoom.us/j/…)">
+      <details class="opc"><summary>¿Ya te dimos la hora? Agrégala para ver la cuenta regresiva (opcional)</summary>
+        <div class="fh"><input id="eFecha" type="date" aria-label="Fecha de tu cita"><input id="eHora" type="time" aria-label="Hora de tu cita (hora de Lima)"></div>
+        <small>Hora de Lima.</small></details>
+      <p class="err" id="eErr"></p>
+      <button class="primary gold" id="eEntrar">Ingresar a la sala de espera</button>
+    </div>
+    <div id="eSala" hidden>
+      <h2 id="eHola"></h2>
+      <input type="hidden" id="eNombreUsado">
+      <div class="ecita" id="eCita"></div>
+      <div class="breath"><span></span></div>
+      <div id="eCuentaBox"><p class="cuenta" id="eCuenta"></p><p class="estado" id="eEstado"></p></div>
+      <p class="estado">Respira con calma. Cuando sea tu hora, entra a Zoom: la doctora te admitirá.</p>
+      <button class="primary gold" id="eZoom">Entrar a la consulta (Zoom)</button>
+      <button class="wa" id="eAviso">Avisar que llegué por WhatsApp</button>
+      <ul class="tips">
+        <li>📄 Ten a la mano tus exámenes y la lista de tus medicamentos.</li>
+        <li>💡 Busca un lugar con buena luz, de frente a una ventana.</li>
+        <li>🤫 Elige un lugar tranquilo y privado, con buena señal de internet.</li>
+        <li>🎧 Si puedes, usa audífonos y ten tu celular con batería.</li>
+      </ul>
+      <p class="fine">Al entrar a Zoom quedarás en espera hasta que la doctora te admita.</p>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status"></div>
+<script src="assets/catalogo-puco.js"></script>
+<script src="assets/catalogo.js"></script>
+<script src="assets/citas-comun.js"></script>
+<script src="assets/app.js"></script>
+<script src="assets/puco-tienda.js"></script>
+</body>
+</html>

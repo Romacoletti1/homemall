@@ -1,0 +1,10 @@
+# Privado: nunca publicar
+costos-puco.*
+*costo*
+*cost*
+tools/
+promo/
+screenshots/
+*.xlsx
+*.csv
+README.md
