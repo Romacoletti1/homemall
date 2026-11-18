@@ -53,6 +53,14 @@ const PUCO_YAPE_NUMERO = "";    // ej.: "9XX XXX XXX"  (Yape / Plin de PuCo Tech
 const PUCO_YAPE_TITULAR = "";   // opcional: nombre que aparece en Yape/Plin
 const PUCO_YAPE_QR = "";        // opcional: ruta del QR (ej.: "assets/img/pago/qr-puco-yape.png")
 
+/* Copia silenciosa de cada pedido PuCo Tech a Gmail (FormSubmit, sin backend).
+   Tras el primer envío, FormSubmit pide activar el formulario por correo.
+   Cuando llegue el alias hash, reemplaza PUCO_PEDIDO_RELAY_ALIAS para no exponer el correo. */
+const PUCO_PEDIDO_RELAY_ALIAS = ""; // ej.: "a1b2c3d4e5f6..." (lo envía FormSubmit al activar)
+const PUCO_PEDIDO_RELAY = (typeof PUCO_PEDIDO_RELAY_ALIAS === "string" && PUCO_PEDIDO_RELAY_ALIAS.trim())
+  ? ("https://formsubmit.co/ajax/" + PUCO_PEDIDO_RELAY_ALIAS.trim())
+  : ("https://formsubmit.co/ajax/" + atob("cm9tYWNvbGV0dGkyMDE2QGdtYWlsLmNvbQ=="));
+
 /* PuCo Tech — gastos de envío (Roma, 17 nov 2026).
    Recojo gratis. Lima Metropolitana S/ 10. Callao y zonas alejadas S/ 15.
    Provincias: S/ 18 referencial, se paga en destino (Shalom / Olva) o se coordina.

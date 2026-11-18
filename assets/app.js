@@ -433,6 +433,7 @@
       if (cli.referencia) l.push(`Referencia: ${cli.referencia}`);
     }
     if (cli.nota) l.push(`Notas: ${cli.nota}`);
+    if (cli.yapeOp) l.push(`N° de operación Yape/Plin: ${cli.yapeOp}`);
     if (notas.length) l.push("", ...notas);
     if (puco) {
       if (yapePuco()) l.push("", "Adjunto la captura de mi pago Yape/Plin por el total. ¿Me confirman el pedido? Gracias.");
@@ -452,7 +453,8 @@
       distrito: $("#cDistrito").value,
       direccion: $("#cDireccion").value.trim(),
       referencia: $("#cReferencia") ? $("#cReferencia").value.trim() : "",
-      nota: $("#cNota").value.trim()
+      nota: $("#cNota").value.trim(),
+      yapeOp: ($("#cYapeOp") && $("#cYapeOp").value.trim()) || ""
     };
     if (cli.distrito === "Otro") cli.distrito = $("#cDistritoOtro").value.trim() || "Otro";
     return cli;
@@ -1468,9 +1470,61 @@
   document.querySelectorAll('input[name="cEnvio"]').forEach((r) => r.addEventListener("change", syncEnvio));
   syncEnvio();
   if ($("#ckVolver")) $("#ckVolver").onclick = () => mostrarPasoCheckout(false);
+  function enviarCopiaPedido(g, cli, nro) {
+    try {
+      if (!esPuco(g.t)) return;
+      const endpoint = (typeof PUCO_PEDIDO_RELAY !== "undefined" && String(PUCO_PEDIDO_RELAY || "").trim()) || "";
+      if (!endpoint) return;
+      const env = cargoEnvio(g, cli);
+      const vol = descVolumenDe(g);
+      const pagar = env ? totalPagar(g, env) : (vol.aplica ? { "S/": Math.round((subtotalSoles(g) - vol.monto) * 100) / 100 } : g.totales);
+      const items = g.items.map((i) => {
+        const p = PROD[i.id], n = p.nombre + (i.talla ? " – talla " + i.talla : "");
+        if (p.precio == null) return i.qty + " x " + n + " (precio a consultar)";
+        const pct = descuentoPctDe(p);
+        return i.qty + " x " + n + " (" + precioDe(p) + " c/u" + (pct ? ", " + pct + "% dto." : "") + ") = " + precioDe(p, p.precio * i.qty);
+      }).join("\n");
+      const descuentos = [];
+      if (vol.tieneDestacado) descuentos.push(notaDestacadosDe(vol) + " (el 10% adicional no se acumula en esos ítems)");
+      if (vol.aplica) descuentos.push("Descuento compra > S/ " + vol.minimo + " (-" + vol.pct + "%): −" + soles(vol.monto));
+      let envioTxt = "—";
+      if (env) {
+        if (env.gratis) envioTxt = env.zona.nombre + ": Gratis";
+        else if (env.pagoEnDestino) envioTxt = env.zona.nombre + ": " + soles(env.monto) + " referencial, se paga en destino";
+        else envioTxt = env.zona.nombre + ": " + soles(env.monto);
+      }
+      const payload = {
+        _subject: "Pedido PuCo Tech " + nro,
+        _template: "table",
+        _captcha: "false",
+        _honey: "",
+        nombre: cli.nombre || "",
+        pedido: nro,
+        items: items,
+        subtotal: fmtTot(g.totales),
+        descuentos: descuentos.join(" | ") || "Ninguno",
+        envio: envioTxt,
+        total: fmtTot(pagar) + (g.cotizar ? " + ítems a cotizar" : ""),
+        celular: cli.celularNorm || cli.celular || "",
+        entrega: cli.envio === "recojo" ? "Recojo en tienda" : "Delivery",
+        distrito: cli.envio === "recojo" ? "" : (cli.distrito || ""),
+        direccion: cli.envio === "recojo" ? "" : (cli.direccion || ""),
+        referencia: cli.envio === "recojo" ? "" : (cli.referencia || ""),
+        notas: cli.nota || "",
+        yape_operacion: cli.yapeOp || "",
+        mensaje: mensaje(g, cli, nro)
+      };
+      const body = JSON.stringify(payload);
+      fetch(endpoint, { method: "POST", headers: { "Content-Type": "application/json", Accept: "application/json" }, body, keepalive: true, mode: "cors" }).catch(() => {});
+    } catch (e) { /* nunca bloquear WhatsApp */ }
+  }
   if ($("#ckYaPague")) $("#ckYaPague").onclick = () => {
     if (!pedidoActual) return;
-    const { g, cli, nro, tid } = pedidoActual;
+    const { g, nro, tid } = pedidoActual;
+    const cli = Object.assign({}, pedidoActual.cli, leerCliente());
+    if ($("#cYapeOp")) cli.yapeOp = $("#cYapeOp").value.trim();
+    pedidoActual.cli = cli;
+    enviarCopiaPedido(g, cli, nro);
     const url = wa(numero(g.t), mensaje(g, cli, nro));
     window.open(url, "_blank", "noopener");
     const b = $("#ckYaPague");

@@ -8,3 +8,8 @@ screenshots/
 *.xlsx
 *.csv
 README.md
+
+# Borrador interno: no publicar el comparador de implantes
+comparador-implantes.html
+comparador-implantes*
+assets/comparador-implantes-ejemplo.json
