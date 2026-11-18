@@ -56,7 +56,7 @@ const PUCO_YAPE_QR = "";        // opcional: ruta del QR (ej.: "assets/img/pago/
 /* Copia silenciosa de cada pedido PuCo Tech a Gmail (FormSubmit, sin backend).
    Tras el primer envío, FormSubmit pide activar el formulario por correo.
    Cuando llegue el alias hash, reemplaza PUCO_PEDIDO_RELAY_ALIAS para no exponer el correo. */
-const PUCO_PEDIDO_RELAY_ALIAS = ""; // ej.: "a1b2c3d4e5f6..." (lo envía FormSubmit al activar)
+const PUCO_PEDIDO_RELAY_ALIAS = "2aafb76c3a2e224b498014cea2b5a796"; // alias FormSubmit (no expone el correo)
 const PUCO_PEDIDO_RELAY = (typeof PUCO_PEDIDO_RELAY_ALIAS === "string" && PUCO_PEDIDO_RELAY_ALIAS.trim())
   ? ("https://formsubmit.co/ajax/" + PUCO_PEDIDO_RELAY_ALIAS.trim())
   : ("https://formsubmit.co/ajax/" + atob("cm9tYWNvbGV0dGkyMDE2QGdtYWlsLmNvbQ=="));
