@@ -1857,3 +1857,35 @@ body.fest-insc-open #festInscripcion{z-index:41}
 @media (max-width:720px){
   .kiosko-cutout .premium-seal{font-size:8px;padding:2px 7px}
 }
+
+
+/* ---- Remate por apertura (DIH Fajas) ---- */
+.remate-badge{display:inline-block;margin-left:.35em;padding:.12em .55em;border-radius:999px;background:linear-gradient(180deg,#f7e7a8,#c9a24a);color:#3a2a0c;font-size:.68em;font-weight:800;letter-spacing:.04em;text-transform:uppercase;vertical-align:middle;line-height:1.3;border:1px solid #9c7426}
+.bact .remate-badge,.cinfo .remate-badge{font-size:.75em}
+#pPrice .remate-badge{font-size:.42em;transform:translateY(-.15em)}
+.scene-banner.descuento,.scene-banner{white-space:nowrap}
+@media (max-width:720px){
+  .scene-banner{white-space:normal;line-height:1.25;letter-spacing:.08em}
+}
+
+/* ---- Videollamada 50% Home Mall ---- */
+.aghm{margin:0 0 1rem;padding:14px 16px 12px;border-radius:14px;background:linear-gradient(180deg,#fffdf6,#f3e6c8);border:1px solid #c9a24a;box-shadow:inset 0 0 0 2px #fbf5e6,0 8px 18px rgba(20,14,10,.08);text-align:center}
+.aghm-icon{display:block;font-size:22px;color:#8c6d2f;line-height:1;margin-bottom:4px}
+.aghm-titulo{font-family:"Cormorant Garamond",Georgia,serif;font-size:1.15rem;font-weight:600;color:#3a2a0c;line-height:1.3;margin:0 0 4px}
+.aghm-nota{margin:0;font-size:13px;font-weight:600;color:#8c6d2f;letter-spacing:.02em}
+#agenda .tipo b .precio-lista{margin-right:.35em;font-weight:500;color:#8a7a6c}
+#agenda .tipo b .precio-oferta{font-weight:800;color:#3a2a0c}
+
+/* ---- Ficha Bichectomía (icono abstracto, sin rostros) ---- */
+#bicheInfo .biche-card{padding:8px 2px 16px;text-align:center}
+#bicheInfo .biche-icon{display:inline-flex;width:64px;height:64px;align-items:center;justify-content:center;border-radius:50%;background:linear-gradient(180deg,#fffdf6,#e8d49a);border:1px solid #c9a24a;box-shadow:inset 0 0 0 3px #fbf5e6,0 8px 20px rgba(20,14,10,.12);color:#8c6d2f;font-size:28px;margin-bottom:8px}
+#bicheInfo h2{font-family:"Cormorant Garamond",Georgia,serif;font-weight:600;font-size:2rem;color:#3a2a0c;margin:.2em 0 .15em}
+#bicheInfo h3{font-family:"Cormorant Garamond",Georgia,serif;font-size:1.15rem;color:#8c6d2f;margin:1.1em 0 .35em;letter-spacing:.04em}
+#bicheInfo .biche-card p{text-align:left;margin:0 auto .2em;max-width:38em;line-height:1.45;color:#3a2f28}
+#bicheInfo #bicheWa{margin-top:1.2em}
+
+.pimg{position:relative}
+.pgal{position:absolute;left:0;right:0;bottom:0;z-index:2}
+#panel.vert .pgal{background:rgba(43,33,27,.72);backdrop-filter:blur(6px)}
+#panel.vert .pgal button{background:#f7efe6;border-color:transparent}
+#panel.vert .pgal button.on{border-color:#c9a24a}

@@ -40,8 +40,17 @@
   };
   const precioHTML = (p, n) => {
     if (!p || p.precio == null && n == null) return "Precio a consultar";
-    const pct = descuentoPctDe(p);
     const venta = precioDe(p, n);
+    if (p && p.remate) {
+      const tieneLista = p.precioVenta != null && p.precio != null && p.precio !== p.precioVenta;
+      const etiqueta = `<span class="remate-badge">${esc(p.remateLabel || "Remate por apertura")}</span>`;
+      if (tieneLista) {
+        const lista = soles(p.precio, mon(p));
+        return `<s class="precio-lista">${lista}</s> <b class="precio-oferta">${venta}</b> ${etiqueta}`;
+      }
+      return `<b class="precio-oferta">${venta}</b> ${etiqueta}`;
+    }
+    const pct = descuentoPctDe(p);
     if (!pct) return venta;
     const lista = soles(precioListaNum(p, n), mon(p));
     return `<s class="precio-lista">${lista}</s> <b class="precio-oferta">${venta}</b> <span class="dto-badge">-${pct}%</span>`;
@@ -833,7 +842,10 @@
         const ps = productosDeSala();
         const tnow = tiendaPorId[e.t];
         if (tnow && tnow.id === "matteo") fx = 0.5;
-        else if (ps.length) fx = ps.reduce((a, p) => a + p.x, 0) / ps.length / 100;
+        else if (tnow && tnow.id === "fajas") {
+          const rem = ps.filter((p) => p.remate && p.x != null);
+          fx = rem.length ? rem.reduce((a, p) => a + p.x, 0) / rem.length / 100 : 0.38;
+        } else if (ps.length) fx = ps.reduce((a, p) => a + p.x, 0) / ps.length / 100;
         if (tnow && tnow.evento && stage.clientWidth < 720) {
           const roma = ps.find((p) => p.standRoma);
           const pc = tnow.evento.pantallaCentral;
@@ -1650,6 +1662,9 @@
         const corto = t.id === "matteo" ? (s.id === "tecnologia" ? "Tecnología" : s.id === "hogar" ? "Hogar" : s.nombre) : s.nombre;
         pill(`${salasNav.length > 1 ? `<small>${i + 1}</small>` : ""}${esc(corto)}`, i === escena.s, () => ir({ tipo: "tienda", t: t.id, s: i }, i < escena.s ? "back" : "fwd"));
       });
+      if (t.id === "consultorio") {
+        pill("Bichectomía", false, () => abrirBichectomiaInfo());
+      }
     }
     const act = nav.querySelector(".active"); if (act && act.scrollIntoView) act.scrollIntoView({ block: "nearest", inline: "center" });
     // info
@@ -1727,7 +1742,7 @@
       box.querySelectorAll("[data-sede]").forEach((b) => { b.onclick = () => abrirSede(b.dataset.sede); });
     }
     else if (t.buscador) { cta.textContent = t.buscadorTitulo ? "🔎 " + t.buscadorTitulo : "🔎 Buscar examen"; cta.onclick = () => abrirBuscador(t); cta.className = "cta"; }
-    else if (t.soloCita) { cta.textContent = "✦ Agenda tu videoconsulta"; cta.onclick = () => abrirAgenda(); cta.className = "cta lux"; }
+    else if (t.soloCita) { const hm = (typeof VIDEOCONSULTA_HOME_MALL !== "undefined" && VIDEOCONSULTA_HOME_MALL.activo !== false); cta.textContent = hm ? "✦ Videollamada · 50% dscto." : "✦ Agenda tu videoconsulta"; cta.onclick = () => abrirAgenda(); cta.className = "cta lux"; }
     else { cta.textContent = "💬 Escribir a la tienda"; cta.onclick = () => window.open(wa(numero(t), `Hola ${nombreTienda(t)}, vengo de ${NOMBRE_CENTRO}. Tengo una consulta.`), "_blank", "noopener"); cta.className = "cta"; }
     const hint = $("#hint");
     if (!t) hint.textContent = "👆 Desliza o arrastra para recorrer el pasillo · toca una tienda para entrar";
@@ -1859,7 +1874,7 @@
     notaC.textContent = sinCompra ? "Esta tienda está en construcción. Pronto podrás armar tu pedido aquí." : "";
     $("#qRow").hidden = !!t.soloCita || p.accion === "turismo" || sinCompra;
     talla = null;
-    const tallas = !t.soloCita && !p.sinTalla && t.tallas ? t.tallas : null;
+    const tallas = !t.soloCita && !p.sinTalla && (p.tallas || t.tallas) ? (p.tallas || t.tallas) : null;
     $("#tRow").hidden = !tallas; $("#tErr").textContent = "";
     $("#pTallas").innerHTML = "";
     (tallas || []).forEach((tl) => { const b = document.createElement("button"); b.type = "button"; b.className = "talla"; b.textContent = tl; b.dataset.talla = tl;
@@ -1900,7 +1915,13 @@
     if (t.soloCita) { (actual.accion || "evaluacion") === "evaluacion" ? abrirCita(actual.nombre) : abrirAgenda(actual.nombre); return; } window.open(wa(numero(t), `Hola ${nombreTienda(t)}, vengo de ${NOMBRE_CENTRO}. Quisiera información sobre: ${actual.nombre}.`), "_blank", "noopener"); };
 
   /* ---------- Capas ---------- */
+  function abrirBichectomiaInfo() {
+    const waBtn = $("#bicheWa");
+    if (waBtn) waBtn.onclick = () => window.open(wa("51915124360", "Hola Dra. Roma Coletti, vengo de Home Mall y quiero agendar una evaluación de bichectomía."), "_blank", "noopener");
+    abrir("#bicheInfo");
+  }
   function abrir(sel) { cerrarTodo(); $(sel).classList.add("open"); $("#scrim").classList.add("on"); }
+
   function cerrarTodo() { pararVideos(); document.body.classList.remove("fest-insc-open"); document.querySelectorAll(".layer.open").forEach((l) => l.classList.remove("open")); $("#scrim").classList.remove("on"); }
   document.querySelectorAll("[data-close]").forEach((b) => (b.onclick = cerrarTodo));
 
@@ -2058,18 +2079,52 @@
   let agTipo = TIPOS_VIDEOCONSULTA[0].id, agRegion = "peru";
   const tipoSel = () => TIPOS_VIDEOCONSULTA.find((t) => t.id === agTipo) || TIPOS_VIDEOCONSULTA[0];
   const precioSel = () => { const t = tipoSel(); return t.precios[agRegion] || t.precios.peru; };
+  const hmVideo = () => (typeof VIDEOCONSULTA_HOME_MALL !== "undefined" && VIDEOCONSULTA_HOME_MALL.activo !== false) ? VIDEOCONSULTA_HOME_MALL : null;
+  const precioConHm = (pr) => {
+    if (!pr) return pr;
+    const hm = hmVideo();
+    if (!hm) return { ...pr, lista: pr.monto, dscto: false };
+    const lista = pr.monto;
+    const monto = Math.round(lista * (1 - (hm.descuentoPct || 50) / 100) * 100) / 100;
+    return { ...pr, lista, monto, dscto: true };
+  };
+  const htmlPrecioHm = (pr) => {
+    const p = precioConHm(pr);
+    const ahora = CitasComun.monto(p.moneda, p.monto);
+    if (!p.dscto) return ahora;
+    return `<s class="precio-lista">${CitasComun.monto(p.moneda, p.lista)}</s> <b class="precio-oferta">${ahora}</b>`;
+  };
   function pintarTipos() {
     const box = $("#aTipos"); box.innerHTML = "";
+    const hm = hmVideo();
+    const offer = $("#agHmOffer");
+    if (offer) {
+      offer.hidden = !hm;
+      if (hm) {
+        offer.querySelector(".aghm-titulo").textContent = hm.titulo || "Videollamada con la Dra. Roma Coletti · 50% dscto. entrando desde Home Mall";
+        offer.querySelector(".aghm-nota").textContent = hm.nota || "50% de descuento entrando desde Home Mall";
+      }
+    }
     tiposAgenda().forEach((t) => {
       const pr = t.precios[agRegion] || t.precios.peru;
       const b = document.createElement("button"); b.type = "button"; b.className = "tipo" + (t.id === agTipo ? " on" : ""); b.dataset.tipo = t.id;
-      b.innerHTML = `<strong>${esc(t.nombre)}</strong><small>${esc(t.desc)}</small><b>${CitasComun.monto(pr.moneda, pr.monto)}</b>`;
+      b.innerHTML = `<strong>${esc(t.nombre)}</strong><small>${esc(t.desc)}</small><b>${htmlPrecioHm(pr)}</b>`;
       b.onclick = () => { agTipo = t.id; pintarTipos(); };
       box.appendChild(b);
     });
     document.querySelectorAll("#aRegion button").forEach((b) => b.classList.toggle("on", b.dataset.region === agRegion));
-    const pr = precioSel();
-    $("#aEnviar").textContent = `Continuar al pago · ${CitasComun.monto(pr.moneda, pr.monto)}`;
+    const pr = precioConHm(precioSel());
+    const btn = $("#aEnviar");
+    const pagoNota = $("#agPagoNota"), waNota = $("#agWaNota");
+    if (pagoNota) pagoNota.hidden = !!hm;
+    if (waNota) waNota.hidden = !hm;
+    if (hm) {
+      btn.textContent = `Agendar por WhatsApp · ${CitasComun.monto(pr.moneda, pr.monto)}`;
+      btn.classList.add("wa");
+    } else {
+      btn.textContent = `Continuar al pago · ${CitasComun.monto(pr.moneda, pr.monto)}`;
+      btn.classList.remove("wa");
+    }
   }
   document.querySelectorAll("#aRegion button").forEach((b) => (b.onclick = () => { agRegion = b.dataset.region; pintarTipos(); }));
   function abrirAgenda(servicio, tipo) {
@@ -2200,7 +2255,22 @@
   $("#spAtras").onclick = () => { $("#spPago").hidden = true; $("#spCheck").hidden = false; };
   $("#spNoWa").onclick = () => window.open(wa(numero(tiendaPorId.consultorio), servPago.noApto.mensaje), "_blank", "noopener");
 
-  $("#aEnviar").onclick = continuarPago;
+    function agendarVideollamadaWhatsApp() {
+    const hm = hmVideo() || { mensaje: "Hola Dra. Roma Coletti, vengo de Home Mall y quiero agendar una videollamada.", whatsapp: "51915124360", descuentoPct: 50 };
+    const nombre = ($("#aNombre") && $("#aNombre").value || "").trim();
+    const tel = ($("#aTel") && $("#aTel").value || "").trim();
+    const serv = ($("#aServicio") && $("#aServicio").value || "").trim();
+    const pr = precioConHm(precioSel());
+    const tipo = (tipoSel() && tipoSel().nombre) || "Videollamada";
+    let msg = hm.mensaje || "Hola Dra. Roma Coletti, vengo de Home Mall y quiero agendar una videollamada con el 50% de descuento.";
+    if (nombre) msg += " Mi nombre es " + nombre + ".";
+    if (tel) msg += " Mi WhatsApp es " + tel + ".";
+    if (serv) msg += " Me interesa: " + serv + ".";
+    if (pr && pr.dscto) msg += " (" + tipo + ", " + CitasComun.monto(pr.moneda, pr.lista) + " → " + CitasComun.monto(pr.moneda, pr.monto) + ").";
+    window.open(wa(hm.whatsapp || "51915124360", msg), "_blank", "noopener");
+  }
+  $("#aEnviar").onclick = () => { if (hmVideo()) agendarVideollamadaWhatsApp(); else continuarPago(); };
+
   $("#pgEnlace").onclick = pagarEnlace;
   $("#pgYaPague").onclick = () => yaPague("Yape");
   $("#pgYaPagueEnlace").onclick = () => yaPague("enlace");

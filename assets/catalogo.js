@@ -158,6 +158,17 @@ const TIPOS_VIDEOCONSULTA = [
     } }
 ];
 
+/* 50% de descuento real en la videollamada para quienes entran desde Home Mall.
+   El CTA de reserva es WhatsApp de la clínica (no el enlace de PayPal a precio lleno). */
+const VIDEOCONSULTA_HOME_MALL = {
+  activo: true,
+  descuentoPct: 50,
+  titulo: "Videollamada con la Dra. Roma Coletti · 50% dscto. entrando desde Home Mall",
+  nota: "50% de descuento entrando desde Home Mall",
+  whatsapp: "51915124360",
+  mensaje: "Hola Dra. Roma Coletti, vengo de Home Mall y quiero agendar una videollamada con el 50% de descuento."
+};
+
 /* ---------------------------- TEMPORADA -------------------------------- */
 const CAMPAÑA_ACTIVA = "navidad";   // ← "navidad" | "sanvalentin" | "madre" | "patrias" | "halloween"
 const CAMBIO_AUTOMATICO = false;    // true = elige la campaña según las fechas de cada una (abajo)
@@ -366,6 +377,7 @@ const TIENDAS = [
     id: "consultorio", nombre: "Roma Coletti", letreroCorto: "Roma Coletti", rubro: "Cirugía Plástica · Contorno Corporal", whatsapp: "51915124360",
     plan: "Premium",
     soloCita: true,   // sin carrito ni precios: todo se solicita por WhatsApp
+    banner: "Videollamada · 50% dscto. entrando desde Home Mall",
     lema: "Sé quien quieras ser", registro: "CMP 60940 · RNE 30051", web: "https://draromacoletti.com/",
     tema: { a: "#8c6d2f", b: "#d4af37" },
     salas: [
@@ -379,7 +391,7 @@ const TIENDAS = [
        Sin x/y = no aparece punto en la foto, pero sí en el menú de Servicios y en la barra inferior. */
     remodelacion: { x: 84, y: 46, texto: "En remodelación", sub: "Postoperatorio" },
     productos: [
-      { id: "zona-agenda",   zona: true, accion: "agenda",    nombre: "Agenda tu videoconsulta", sub: "Consulta médica virtual", sala: "consultorio", x: 52, y: 58, visibleEnParcial: true, desc: "" },
+      { id: "zona-agenda",   zona: true, accion: "agenda",    nombre: "Videollamada con la Dra. Roma Coletti", sub: "50% dscto. entrando desde Home Mall", sala: "consultorio", x: 52, y: 58, visibleEnParcial: true, desc: "" },
       { id: "zona-servicios", zona: true, accion: "servicios", nombre: "Servicios",              sub: "Cirugía · Bienestar · Exámenes", sala: "consultorio", x: 18, y: 60, desc: "" },
       { id: "zona-espera",   zona: true, accion: "espera",    nombre: "Sala de espera virtual",  sub: "Con tu enlace de Zoom", sala: "consultorio", x: 72, y: 32, desc: "" },
       { id: "espera-entrar", zona: true, accion: "espera",    nombre: "Ingresar a la sala de espera", sub: "Con tu nombre o código", sala: "espera", x: 46, y: 62, desc: "" },
@@ -427,19 +439,31 @@ const TIENDAS = [
     tallas: ["XS", "S", "M", "L", "XL", "XXL"],   // selector de talla en prendas (no en accesorios con sinTalla)
     fotosVerticales: true,                        // las fotos de producto se muestran completas (maniquí entero)
     aviso: "Precios incluyen IGV",
+    banner: "Remate por apertura",
     salas: [{ id: "tienda", nombre: "Showroom", sub: "Toca un maniquí o un punto dorado para ver la prenda", img: "assets/img/tiendas/fajas-maniquies.jpg" }],
     productos: [
+      /* Remate por apertura (precios indicados por Roma el 19 nov 2026). Sin precio anterior en el catálogo: no se tacha ni se inventa un % de descuento. */
+      { id: "faja-tiras", nombre: "Tiras", precio: 150, remate: true, x: 44, y: 36,
+        img: "assets/img/productos/faja-tiras.jpg",
+        desc: "Brasier de tiras con broche al frente." },
+      { id: "faja-cachetero", nombre: "Cacheteros", precio: 120, remate: true, x: 56, y: 58,
+        img: "assets/img/productos/faja-cachetero.jpg",
+        desc: "Cachetero de talle alto, con encaje en el ruedo." },
+      { id: "faja-chaleco", nombre: "Chalecos de látex", precio: 200, remate: true, tallas: ["S", "M", "L"], x: 16, y: 48,
+        img: "assets/img/productos/faja-chaleco-beige.jpg",
+        fotos: ["assets/img/productos/faja-chaleco-negro.jpg"],
+        desc: "Chaleco bajo busto. Colores: beige y negro. Tallas S, M y L." },
       { id: "faja-tl", nombre: "Tabla lumbar",              precio: 120, sinTalla: true, x: 9,  y: 62, img: "assets/img/productos/faja-tl.jpg", desc: "Tabla de apoyo lumbar." },
       { id: "faja-ta", nombre: "Tabla abdominal",           precio: 120, sinTalla: true, x: 83, y: 48, img: "assets/img/productos/faja-ta.jpg", desc: "Tabla de apoyo abdominal." },
       { id: "faja-lf", nombre: "Lipo foam x3",              precio: 180, sinTalla: true, x: 9,  y: 48, img: "assets/img/productos/faja-lf.jpg", desc: "Set de 3 láminas de foam." },
       { id: "faja-me", nombre: "Mentonera",                 precio: 100, sinTalla: true, x: 91, y: 36, img: "assets/img/productos/faja-me.jpg", desc: "Mentonera de compresión." },
       { id: "faja-fo", nombre: "Formador de ombligo",       precio: 100, sinTalla: true, x: 91, y: 62, img: "assets/img/productos/faja-fo.jpg", desc: "Formador de ombligo." },
-      { id: "faja-ci", nombre: "Cinturilla",                precio: 270, x: 70, y: 48, img: "assets/img/productos/faja-ci.jpg", desc: "Cinturilla de compresión." },
-      { id: "faja-en", nombre: "Faja enterizo",             precio: 350, x: 56, y: 46, img: "assets/img/productos/faja-en.jpg", desc: "Faja enterizo de compresión." },
-      { id: "faja-sh", nombre: "Faja Sheila",               precio: 210, x: 43, y: 50, img: "assets/img/productos/faja-sh.jpg", desc: "Faja Sheila de compresión." },
-      { id: "faja-br", nombre: "Brasier postoperatorio",    precio: 200, x: 30, y: 38, img: "assets/img/productos/faja-br.jpg", desc: "Brasier postoperatorio." },
-      { id: "faja-bs", nombre: "Faja bajo busto sin mangas", precio: 350, x: 17, y: 46, img: "assets/img/productos/faja-bs.jpg", desc: "Faja bajo busto sin mangas." },
-      { id: "faja-bc", nombre: "Faja bajo busto con mangas", precio: 350, x: 63, y: 32, img: "assets/img/productos/faja-bc.jpg", desc: "Faja bajo busto con mangas." }
+      { id: "faja-ci", nombre: "Cinturilla",                precio: 270, x: 72, y: 62, img: "assets/img/productos/faja-ci.jpg", desc: "Cinturilla de compresión." },
+      { id: "faja-en", nombre: "Faja enterizo",             precio: 350, img: "assets/img/productos/faja-en.jpg", desc: "Faja enterizo de compresión." },
+      { id: "faja-sh", nombre: "Faja Sheila",               precio: 210, img: "assets/img/productos/faja-sh.jpg", desc: "Faja Sheila de compresión." },
+      { id: "faja-br", nombre: "Brasier postoperatorio",    precio: 200, img: "assets/img/productos/faja-br.jpg", desc: "Brasier postoperatorio." },
+      { id: "faja-bs", nombre: "Faja bajo busto sin mangas", precio: 350, img: "assets/img/productos/faja-bs.jpg", desc: "Faja bajo busto sin mangas." },
+      { id: "faja-bc", nombre: "Faja bajo busto con mangas", precio: 350, img: "assets/img/productos/faja-bc.jpg", desc: "Faja bajo busto con mangas." }
     ]
   },
   {

@@ -15,8 +15,8 @@
 <link rel="apple-touch-icon" href="assets/img/marca/icono-180.png">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="preload" as="image" href="assets/img/marca/portada-home-mall.webp" type="image/webp">
-<link rel="stylesheet" href="assets/fuentes.css?v=20261118m">
-<link rel="stylesheet" href="assets/estilos.css?v=20261118m">
+<link rel="stylesheet" href="assets/fuentes.css?v=20261119a">
+<link rel="stylesheet" href="assets/estilos.css?v=20261119a">
 </head>
 <body>
 <header class="top">
@@ -464,6 +464,11 @@
   <button class="x" data-close aria-label="Cerrar">×</button>
   <div class="advhead"><span class="avatar">✦</span><div><strong>Agenda tu videoconsulta</strong><small>Dra. Roma Coletti · Cirugía Plástica</small></div></div>
   <div id="agForm">
+    <div class="aghm" id="agHmOffer">
+      <span class="aghm-icon" aria-hidden="true">✦</span>
+      <p class="aghm-titulo">Videollamada con la Dra. Roma Coletti · 50% dscto. entrando desde Home Mall</p>
+      <p class="aghm-nota">50% de descuento entrando desde Home Mall</p>
+    </div>
     <p class="step">1 · ¿Dónde te encuentras?</p>
     <div class="seg" id="aRegion"><button type="button" data-region="peru" class="on">🇵🇪 En Perú</button><button type="button" data-region="extranjero">🌎 En el extranjero</button></div>
     <p class="step">2 · Tipo de videoconsulta</p>
@@ -476,8 +481,9 @@
       <label>Procedimiento de interés<select id="aServicio"></select></label>
     </div>
     <p class="err" id="agErr"></p>
-    <button class="primary gold" id="aEnviar" type="button">Continuar al pago</button>
-    <p class="fine">Primero se realiza el pago. Luego envías tu comprobante por WhatsApp y <b>coordinamos contigo la fecha y la hora por WhatsApp</b>; por ahí también te enviamos el enlace de Zoom.</p>
+    <button class="primary gold" id="aEnviar" type="button">Agendar por WhatsApp</button>
+    <p class="fine" id="agPagoNota" hidden>Primero se realiza el pago. Luego envías tu comprobante por WhatsApp y <b>coordinamos contigo la fecha y la hora por WhatsApp</b>; por ahí también te enviamos el enlace de Zoom.</p>
+    <p class="fine" id="agWaNota">Escríbenos por WhatsApp al +51 915 124 360. Menciona que vienes de Home Mall para acceder al 50% de descuento. Coordinamos contigo la fecha, la hora y el enlace de Zoom.</p>
   </div>
   <div id="agPago" hidden>
     <p class="step">Pago de tu videoconsulta</p>
@@ -514,6 +520,21 @@
     <p class="fine" id="okDetalle"></p>
     <a class="walink" id="okWa" target="_blank" rel="noopener">¿No se abrió WhatsApp? Toca aquí</a>
     <button class="primary gold" id="okEspera" type="button">Ir a la sala de espera virtual</button>
+  </div>
+</aside>
+
+<!-- Consultorio: Bichectomía (texto informativo; sin fotos de rostros) -->
+<aside class="layer sheet luxl" id="bicheInfo" aria-label="Bichectomía">
+  <button class="x" data-close aria-label="Cerrar">×</button>
+  <div class="biche-card">
+    <span class="biche-icon" aria-hidden="true">✦</span>
+    <h2>Bichectomía</h2>
+    <p class="fine l">Dra. Roma Coletti · Cirugía Plástica</p>
+    <h3>Qué es</h3>
+    <p>La bichectomía es un procedimiento que reduce el volumen de las bolsas de Bichat, la grasa de la parte baja de las mejillas, para estilizar el tercio inferior del rostro. Se indica solo después de una evaluación médica.</p>
+    <h3>Recuperación</h3>
+    <p>Después del procedimiento es habitual que haya inflamación y molestias los primeros días. El reposo, el cuidado de la zona y el seguimiento los indica la doctora según tu caso.</p>
+    <button class="primary gold" id="bicheWa" type="button">Agenda tu evaluación por WhatsApp</button>
   </div>
 </aside>
 
@@ -564,10 +585,10 @@
 </div>
 
 <div class="toast" id="toast" role="status"></div>
-<script src="assets/catalogo-puco.js?v=20261118m"></script>
-<script src="assets/catalogo.js?v=20261118m"></script>
-<script src="assets/citas-comun.js?v=20261118m"></script>
-<script src="assets/app.js?v=20261118m"></script>
-<script src="assets/puco-tienda.js?v=20261118m"></script>
+<script src="assets/catalogo-puco.js?v=20261119a"></script>
+<script src="assets/catalogo.js?v=20261119a"></script>
+<script src="assets/citas-comun.js?v=20261119a"></script>
+<script src="assets/app.js?v=20261119a"></script>
+<script src="assets/puco-tienda.js?v=20261119a"></script>
 </body>
 </html>
