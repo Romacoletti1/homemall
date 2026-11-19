@@ -87,6 +87,7 @@
 
   const MAPA_ESTADO = (typeof TIENDAS_ESTADO !== "undefined") ? TIENDAS_ESTADO : {};
   const FEST = (typeof AESTHETIC_FEST !== "undefined") ? AESTHETIC_FEST : null;
+  function festUiActiva() { return !!(FEST && FEST.visible !== false); }
   function estadoDe(t) {
     if (!t) return "construccion";
     const id = typeof t === "string" ? t : t.id;
@@ -253,7 +254,7 @@
   function pintarProximamente(root, t) {
     const el = document.createElement("div");
     el.className = "proximamente" + (t.id === "convenciones" ? " fest" : "");
-    if (t.id === "convenciones" && FEST) {
+    if (t.id === "convenciones" && festUiActiva()) {
       el.id = "festPrx";
       el.innerHTML = `<div class="prx-card fest">
         <small>Centro de Convenciones Home Mall</small>
@@ -305,7 +306,7 @@
     if (e === "construccion") {
       t.enConstruccion = true;
       t.sinCompra = true;
-      if (t.id === "convenciones") t.banner = "Aesthetic Fest · Fecha por anunciar";
+      if (t.id === "convenciones") t.banner = festUiActiva() ? "Aesthetic Fest · Fecha por anunciar" : "";
       else if (!t.banner) t.banner = "En construcción";
     }
     if (e === "parcial" && t.id === "laboratorio") t.sinCompra = true;
@@ -818,10 +819,15 @@
     const cargar = () => {
       img.onload = null; medir();
       let fx = 0.5;
+      let pucoHeadOn = false;
       if (e.tipo === "pasillo" && pucoPremiumActivo() && PUCO_PREMIUM.prioridadPasillo !== false) {
         const P = PASILLOS[e.i];
         const dest = P && (P.vitrinas || []).find((v) => v.tienda === "matteo");
-        if (dest && dest.x != null) fx = dest.x / 100;
+        if (dest) {
+          const vit = dest.vitrina;
+          fx = vit ? (vit.x + vit.w / 2) / 100 : (dest.x != null ? dest.x / 100 : fx);
+          pucoHeadOn = true;
+        }
       }
       if (e.tipo === "tienda") {
         const ps = productosDeSala();
@@ -836,7 +842,8 @@
           if (xs.length) fx = xs.reduce((a, b) => a + b, 0) / xs.length / 100;
         }
       }
-      centrar(dir === "back" ? Math.min(fx + 0.2, 1) : Math.max(fx - 0.2, 0));
+      const lead = pucoHeadOn ? 0 : 0.2;
+      centrar(dir === "back" ? Math.min(fx + lead, 1) : Math.max(fx - lead, 0));
       pintarSpots();
       stage.classList.remove("leaving"); void stage.offsetWidth; stage.classList.add(dir === "back" ? "enter-back" : "enter-fwd");
       requestAnimationFrame(() => { pano.classList.add("glide"); centrar(fx); setTimeout(() => pano.classList.remove("glide"), 1300); });
@@ -1008,7 +1015,7 @@
     mostrar(ledIdx || 0);
   }
   function pintarBeneficio(t) {
-    const box = $("#beneficioFest"), B = t && t.evento && t.evento.beneficio;
+    const box = $("#beneficioFest"), B = festUiActiva() && t && t.evento && t.evento.beneficio;
     if (!box) return;
     const on = !!B;
     box.hidden = !on;
@@ -1204,7 +1211,7 @@
         tipo: "roma",
         tema: "gold",
         img: entry.img,
-        titulo: entry.titulo || entry.nombre || "Consultorio",
+        titulo: entry.titulo || entry.nombre || "",
         motivo: entry.motivo || "",
         id: entry.id || null
       });
@@ -1218,10 +1225,10 @@
     const btn = document.createElement("button");
     btn.type = "button";
     if (gold || item.tipo === "roma") {
-      const nombre = item.titulo || "Roma Coletti";
+      const nombre = item.titulo || "Consultorio Roma Coletti";
       btn.className = "roma-holo";
-      btn.setAttribute("aria-label", [nombre, item.motivo].filter(Boolean).join(" · "));
-      btn.innerHTML = `<span class="roma-beam" aria-hidden="true"></span><span class="roma-pedestal" aria-hidden="true"></span><span class="roma-frame"><img class="holo-fig" src="${esc(item.img || "")}" alt="${esc(nombre)}" loading="lazy" decoding="async" width="160" height="200">${holoCaption(nombre, item.motivo)}</span>`;
+      btn.setAttribute("aria-label", [item.titulo || "Consultorio Roma Coletti", item.motivo].filter(Boolean).join(" · "));
+      btn.innerHTML = `<span class="roma-beam" aria-hidden="true"></span><span class="roma-pedestal" aria-hidden="true"></span><span class="roma-frame"><img class="holo-fig" src="${esc(item.img || "")}" alt="${esc(nombre)}" loading="lazy" decoding="async" width="160" height="200">${holoCaption(item.titulo || "", item.motivo)}</span>`;
       btn.addEventListener("click", (e) => {
         if (movido) return;
         e.stopPropagation();
@@ -1412,7 +1419,7 @@
         s.innerHTML = t.esTemporada ? `<small>Tienda de Temporada</small><b>${esc(CAMP.letrero)}</b>`
           : t.soloCita ? `<b>${esc(t.letreroCorto || t.nombre)}</b><small>Cirugía Plástica</small>`
           : v.kiosko ? `<b>${esc(t.letreroCorto || t.nombre)}</b><small>Hechos a mano</small>`
-          : v.colgante ? `<small>Aesthetic Fest · Fecha por anunciar</small><b>${esc(t.letreroCorto || t.nombre)}</b>`
+          : v.colgante ? (festUiActiva() ? `<small>Aesthetic Fest · Fecha por anunciar</small><b>${esc(t.letreroCorto || t.nombre)}</b>` : `<b>${esc(t.letreroCorto || t.nombre)}</b>`)
           : `<b>${esc(t.letreroCorto || t.nombre)}</b>`;
         if (v.colgante) s.addEventListener("click", (e) => { if (movido) return; e.stopPropagation(); entrar(t.id); });
         if (t.id === "matteo" && pucoPremiumActivo()) {
@@ -1433,15 +1440,19 @@
         spots.appendChild(s);
         if (t.id === "matteo" && pucoPremiumActivo() && PUCO_PREMIUM.hologramas !== false) pintarHologramas(spots, v, t, "puco");
         if (t.id === "amigurumis" && amiPremiumActivo()) {
-          s.classList.add("premium");
-          s.insertAdjacentHTML("afterbegin", `<span class="premium-badge">Premium</span>`);
+          if (AMIGURUMIS_PREMIUM.letreroFlotante === false) {
+            s.hidden = true;
+          } else {
+            s.classList.add("premium");
+            s.insertAdjacentHTML("afterbegin", `<span class="premium-badge">Premium</span>`);
+          }
           if (AMIGURUMIS_PREMIUM.vitrinaDestacada !== false) {
             /* Recorte del carrito en pasillo-1.jpg (px 220,426,216×226 de 1280×720),
                colocado con las mismas fracciones para que el drop-shadow no se desregistre. */
             const wrap = document.createElement("div");
             wrap.className = "kiosko-cutout";
             wrap.setAttribute("aria-hidden", "true");
-            wrap.innerHTML = `<img src="assets/img/tiendas/ami-carrito-cutout.png?v=20261118g" alt="" draggable="false">`;
+            wrap.innerHTML = `<img src="assets/img/tiendas/ami-carrito-cutout.png?v=20261118g" alt="" draggable="false"><span class="premium-seal">Premium</span>`;
             spots.appendChild(wrap);
           }
           if (AMIGURUMIS_PREMIUM.hologramas !== false) pintarHologramas(spots, v, t, "ami");
@@ -1460,8 +1471,8 @@
         }
         if (t.enConstruccion && !v.colgante) {
           const ribbon = document.createElement("div");
-          ribbon.className = "vitrina-cinta" + (t.id === "convenciones" ? " fest" : "");
-          ribbon.innerHTML = t.id === "convenciones"
+          ribbon.className = "vitrina-cinta" + (t.id === "convenciones" && festUiActiva() ? " fest" : "");
+          ribbon.innerHTML = (t.id === "convenciones" && festUiActiva())
             ? "<b>Aesthetic Fest · Fecha por anunciar</b>"
             : "<b>En construcción</b>";
           if (v.vitrina) {
@@ -1698,7 +1709,7 @@
     if (ctaSedes) ctaSedes.hidden = true;
     if (cta) cta.hidden = false;
     if (!t) { cta.textContent = "🗺️ Directorio"; cta.onclick = () => abrir("#directorio"); cta.className = "cta"; }
-    else if (t.evento) { cta.textContent = "✦ Inscripción gratis"; cta.onclick = () => abrirFestInscripcion(); cta.className = "cta lux"; }
+    else if (t.evento && festUiActiva()) { cta.textContent = "✦ Inscripción gratis"; cta.onclick = () => abrirFestInscripcion(); cta.className = "cta lux"; }
     else if (enObras(t)) { cta.textContent = "Próximamente"; cta.onclick = () => toast("Esta tienda está en construcción"); cta.className = "cta"; }
     else if (t.turismo) { cta.textContent = "✈ Solicitar tratamiento"; cta.onclick = () => abrirTurismo(t); cta.className = "cta"; }
     else if (t.id === "laboratorio" && estadoDe(t) === "parcial") {
@@ -1737,7 +1748,7 @@
     } else { sb.hidden = true; sb.innerHTML = ""; }
     let fb = $("#festPasilloBar");
     if (!fb) { fb = document.createElement("button"); fb.id = "festPasilloBar"; fb.className = "fest-pasillo-bar"; fb.type = "button"; stage.appendChild(fb); }
-    if (!t && FEST) {
+    if (!t && festUiActiva()) {
       fb.hidden = false;
       fb.innerHTML = `<b>Aesthetic Fest</b><span>${esc(FEST.fechasLargo)}</span><i>Inscripción gratis</i>`;
       fb.onclick = (ev) => { ev.preventDefault(); ev.stopPropagation(); abrirFestInscripcion(); };
@@ -2339,8 +2350,9 @@
     setTimeout(() => w.classList.remove("abriendo", "cruzando"), 1900);
   }
   if ($("#wfestaFecha") && FEST) $("#wfestaFecha").textContent = FEST.fechasLargo || "Fecha por anunciar";
+  if ($("#wfesta")) $("#wfesta").hidden = !festUiActiva();
   const festBtn = $("#festAvisar");
-  if (festBtn) festBtn.onclick = (e) => { e.preventDefault(); e.stopPropagation(); abrirFestInscripcion(); };
+  if (festBtn) festBtn.onclick = (e) => { e.preventDefault(); e.stopPropagation(); if (festUiActiva()) abrirFestInscripcion(); };
   if ($("#festEnviar")) $("#festEnviar").onclick = () => { enviarFestInscripcion(); };
   if ($("#festGraciasCerrar")) $("#festGraciasCerrar").onclick = () => cerrarTodo();
   $("#startTour").onclick = abrirPuerta;
@@ -2359,12 +2371,12 @@
     else if (tiendaPorId[tid] && tiendaPorId[tid].salas) { ini = { tipo: "tienda", t: tid, s: Math.max(0, tiendaPorId[tid].salas.findIndex((s) => s.id === sid)) }; $("#welcome").classList.add("gone"); }
   }
   if (h === "visa" || h === "turismo/secreto") { ini = { tipo: "tienda", t: "turismo", s: 0 }; $("#welcome").classList.add("gone"); setTimeout(() => abrirSecreto(tiendaPorId.turismo), 900); }
-  if (FEST_HASHES[h]) { $("#welcome").classList.add("gone"); setTimeout(() => abrirFestInscripcion(), 200); }
+  if (FEST_HASHES[h] && festUiActiva()) { $("#welcome").classList.add("gone"); setTimeout(() => abrirFestInscripcion(), 200); }
 
   window.addEventListener("hashchange", () => {
     const h = decodeURIComponent(location.hash.slice(1) || "");
     if (!h) return;
-    if (FEST_HASHES[h]) { abrirFestInscripcion(); return; }
+    if (FEST_HASHES[h] && festUiActiva()) { abrirFestInscripcion(); return; }
     const pi = PASILLOS.findIndex((p) => p.id === h);
     if (pi >= 0) { if (escena.tipo !== "pasillo" || escena.i !== pi) ir({ tipo: "pasillo", i: pi }, "fwd"); return; }
     const [tid, sid] = h.split("/");

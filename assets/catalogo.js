@@ -114,6 +114,9 @@ const TIENDAS_ESTADO = {
 };
 
 const AESTHETIC_FEST = {
+  /* false = oculta tarjetas, barra, botón e inscripción automática.
+     El formulario y el envío por FormSubmit quedan en el código; pon visible: true para reactivar. */
+  visible: false,
   titulo: "Aesthetic Fest",
   fechasCorto: "Fecha por anunciar",
   fechasLargo: "Fecha por anunciar",
@@ -194,7 +197,8 @@ const AMIGURUMIS_PREMIUM = {
   activo: true,
   plan: "Premium",
   vitrinaDestacada: true,
-  hologramas: true,
+  hologramas: false,          /* off: las tarjetas “Conejita · DESTACADO” cargaban el pasillo */
+  letreroFlotante: false,     /* off: oculta la placa “PREMIUM Amigurumis · Hechos a mano”; queda el brillo y el sello */
   /* motivo = por qué está en la vitrina (cámbialo tú; no pongas descuentos ni
      “best seller” si no están en el catálogo). */
   destacados: [
@@ -215,11 +219,10 @@ const ROMA_PREMIUM = {
   vitrinaDestacada: true,
   hologramas: true,
   /* motivo = por qué flota (sin precios). Cámbialo tú. */
+  /* Máximo 1–2 imágenes, sin rótulos “Especialidad” / “Agenda tu cita”. */
   destacados: [
-    { img: "assets/img/tiendas/roma-premium/recepcion.jpg", titulo: "Recepción", motivo: "Agenda tu cita", id: "zona-agenda" },
-    { img: "assets/img/tiendas/roma-premium/tratamiento.jpg", titulo: "Lipoescultura", motivo: "Especialidad", id: "cx-1" },
-    { img: "assets/img/tiendas/roma-premium/espera.jpg", titulo: "Lipoabdominoplastia", motivo: "Especialidad", id: "cx-2" },
-    { img: "assets/img/tiendas/roma-premium/salon.jpg", titulo: "Mamas", motivo: "Especialidad", id: "cx-3" }
+    { img: "assets/img/tiendas/roma-premium/recepcion.jpg", titulo: "", motivo: "", id: "zona-agenda" },
+    { img: "assets/img/tiendas/roma-premium/tratamiento.jpg", titulo: "", motivo: "", id: "cx-1" }
   ]
 };
 

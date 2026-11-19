@@ -1835,3 +1835,25 @@ body.fest-insc-open #festInscripcion{z-index:41}
   pointer-events:none;background:linear-gradient(180deg,rgba(43,33,27,.28),rgba(43,33,27,.55));
 }
 #festPrx .prx-card{width:min(420px, calc(100% - 24px));max-width:calc(100% - 24px)}
+
+/* Entrada: un solo destacado de PuCo Tech, sin tarjetas extra */
+.welcome .wpuco{
+  margin:10px 0 2px;text-align:center;font-family:var(--serif),Georgia,serif;
+  font-size:20px;color:#7a5a1e;letter-spacing:.04em;
+}
+.welcome .wpuco span{
+  display:block;font-family:var(--sans);font-size:10px;letter-spacing:.18em;
+  text-transform:uppercase;color:#8c6d2f;margin-bottom:2px;font-weight:700;
+}
+/* Sello Premium pequeño en el recorte del carrito, sin placa de nombre */
+.kiosko-cutout{position:relative}
+.kiosko-cutout .premium-seal{
+  position:absolute;left:50%;top:8%;transform:translateX(-50%);
+  font-size:calc(var(--pw)*.0075);letter-spacing:.16em;text-transform:uppercase;
+  font-weight:700;color:#8c6d2f;background:linear-gradient(180deg,#f7e7a8,#d9b45a);
+  border:1px solid rgba(156,116,38,.7);border-radius:999px;padding:.15em .7em;
+  box-shadow:0 2px 8px rgba(43,33,27,.25);pointer-events:none;white-space:nowrap;
+}
+@media (max-width:720px){
+  .kiosko-cutout .premium-seal{font-size:8px;padding:2px 7px}
+}
