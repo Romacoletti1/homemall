@@ -50,8 +50,8 @@ const PAGO = {
 /* PuCo Tech — Yape/Plin de la tienda (NO uses el Yape de la clínica 915 124 360).
    Vacío = en el paso de pago se muestra «Próximamente». Completa el número cuando lo tengas. */
 const PUCO_YAPE_NUMERO = "948 042 949";  // Yape / Plin de PuCo Tech
-const PUCO_YAPE_TITULAR = "Rocio Coletti";  // exactamente como aparece en Yape
-const PUCO_YAPE_QR = "";        // aún no hay QR; el checkout funciona sin él
+const PUCO_YAPE_TITULAR = "Rocio Mariela Coletti Arnao";  // como aparece en el QR de Yape
+const PUCO_YAPE_QR = "assets/img/pago/yape-qr.jpg";
 
 /* PuCo Tech — PayPal Payments Standard (sin API) para pagar con tarjeta o PayPal.
    La lista oficial de monedas de Payments Standard no incluye soles (PEN),
