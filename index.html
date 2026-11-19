@@ -15,8 +15,8 @@
 <link rel="apple-touch-icon" href="assets/img/marca/icono-180.png">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="preload" as="image" href="assets/img/marca/portada-home-mall.webp" type="image/webp">
-<link rel="stylesheet" href="assets/fuentes.css?v=20261118j">
-<link rel="stylesheet" href="assets/estilos.css?v=20261118j">
+<link rel="stylesheet" href="assets/fuentes.css?v=20261118l">
+<link rel="stylesheet" href="assets/estilos.css?v=20261118l">
 </head>
 <body>
 <header class="top">
@@ -144,9 +144,9 @@
     <div class="wfesta" id="wfesta">
       <small>Centro de Convenciones Home Mall</small>
       <b>Aesthetic Fest</b>
-      <span>11 al 23 de diciembre de 2026</span>
-      <p>Descuentos exclusivos en cada especialidad. Con preoperatorio completo: evaluación preoperatoria gratuita y luego agendas con quien quieras.</p>
-      <button type="button" class="fest-cta" id="festAvisar">Avisarme / Quiero participar</button>
+      <span id="wfestaFecha">Fecha por anunciar</span>
+      <p>Charlas gratuitas de contorno corporal, organizadas por Roma Coletti. Inscripción gratis para registrar tu asistencia. No se solicita ningún pago.</p>
+      <button type="button" class="fest-cta" id="festAvisar">Inscripción gratis</button>
     </div>
     <div class="wacciones"><button class="link light" id="startTour">Entrar al centro comercial →</button><button class="link light" id="wDir">Ver directorio de tiendas</button></div>
     <button type="button" class="wbuzon" id="wBuzon" aria-label="Buzón de sugerencias">
@@ -155,6 +155,40 @@
     </button>
   </div>
 </div>
+
+
+<aside class="layer sheet fest-insc" id="festInscripcion" aria-label="Inscripción gratis Aesthetic Fest">
+  <button class="x" data-close aria-label="Cerrar">×</button>
+  <div id="festFormWrap">
+    <span class="eyebrow">Aesthetic Fest · Inscripción gratis</span>
+    <h2>Inscripción gratis</h2>
+    <p class="turintro" id="festIntro">Roma Coletti organiza el Aesthetic Fest como marca, con charlas gratuitas sobre técnicas quirúrgicas de contorno corporal, prótesis y otros materiales, anestesia, terapia del dolor y lectura del preoperatorio. La inscripción es gratuita y nos permite registrar quiénes asistirán.</p>
+    <p class="ehfecha" id="festFecha">Fecha por anunciar</p>
+    <label>Nombre<input id="festNombre" name="nombre" autocomplete="name" placeholder="Tu nombre" maxlength="80"></label>
+    <label>Celular (WhatsApp)<input id="festCelular" name="celular" type="tel" inputmode="numeric" autocomplete="tel" placeholder="9 dígitos (Perú)" maxlength="15"></label>
+    <label>Correo <i>(opcional)</i><input id="festCorreo" name="correo" type="email" autocomplete="email" placeholder="tucorreo@ejemplo.com" maxlength="120"></label>
+    <fieldset class="fest-set">
+      <legend>¿Cómo te inscribes?</legend>
+      <div class="fest-ops" id="festTipos"></div>
+    </fieldset>
+    <fieldset class="fest-set">
+      <legend>Temas de interés <i>(puedes marcar varios)</i></legend>
+      <div class="fest-ops" id="festTemas"></div>
+    </fieldset>
+    <label class="fest-consent"><input type="checkbox" id="festConsent"> Autorizo a que me contacten sobre el Aesthetic Fest y estas charlas.</label>
+    <p class="err" id="festErr"></p>
+    <button type="button" class="primary gold" id="festEnviar">Enviar inscripción</button>
+    <p class="fine">Inscripción gratuita. No se solicita ningún pago. La fecha se anunciará aquí.</p>
+  </div>
+  <div id="festGracias" hidden>
+    <span class="eyebrow">Aesthetic Fest</span>
+    <div class="fest-check" aria-hidden="true">✓</div>
+    <h2>Inscripción recibida</h2>
+    <p class="turintro" id="festGraciasTxt">Gracias. Recibimos tu inscripción gratuita. Te contactaremos por WhatsApp o correo cuando se anuncie la fecha.</p>
+    <p class="fest-nro">Tu código de inscripción: <b id="festCodigo"></b></p>
+    <button type="button" class="primary gold" id="festGraciasCerrar">Cerrar</button>
+  </div>
+</aside>
 
 <div class="scrim" id="scrim"></div>
 
@@ -529,10 +563,10 @@
 </div>
 
 <div class="toast" id="toast" role="status"></div>
-<script src="assets/catalogo-puco.js?v=20261118j"></script>
-<script src="assets/catalogo.js?v=20261118j"></script>
-<script src="assets/citas-comun.js?v=20261118j"></script>
-<script src="assets/app.js?v=20261118j"></script>
-<script src="assets/puco-tienda.js?v=20261118j"></script>
+<script src="assets/catalogo-puco.js?v=20261118l"></script>
+<script src="assets/catalogo.js?v=20261118l"></script>
+<script src="assets/citas-comun.js?v=20261118l"></script>
+<script src="assets/app.js?v=20261118l"></script>
+<script src="assets/puco-tienda.js?v=20261118l"></script>
 </body>
 </html>

@@ -1198,21 +1198,25 @@ body.tienda-puco .door{z-index:5;font-size:12px;padding:8px 12px;max-width:44%;w
 
 .welcome .wfesta{
   margin:14px 0 4px;padding:14px 16px 16px;text-align:center;
-  background:linear-gradient(180deg,rgba(250,246,238,.7),rgba(232,220,190,.55));
-  border:1px solid rgba(184,146,74,.55);border-radius:14px;color:#faf6ee
+  background:linear-gradient(180deg,#fffdf8,#f3e6c8);
+  border:1px solid rgba(184,146,74,.7);border-radius:14px;color:#2b211b
 }
 .welcome .wfesta small{
-  display:block;letter-spacing:.16em;text-transform:uppercase;font-size:10px;color:#e8d5a0;margin-bottom:4px
+  display:block;letter-spacing:.16em;text-transform:uppercase;font-size:10px;color:#8c6d2f;margin-bottom:4px
 }
-.welcome .wfesta b{display:block;font-family:Georgia,serif;font-size:20px;color:#f4e4b8}
-.welcome .wfesta span{display:block;margin-top:4px;font-size:13px;color:#f0e6d0}
-.welcome .wfesta p{margin:8px 0 0;font-size:12.5px;line-height:1.45;color:#e8dcc4}
-.welcome .wfesta .fest-cta{background:#f4e4b8;color:#2b211b}
+.welcome .wfesta b{display:block;font-family:var(--serif),Georgia,serif;font-size:22px;color:#7a5a1e}
+.welcome .wfesta span{display:block;margin-top:4px;font-size:13px;color:#6b5428}
+.welcome .wfesta p{margin:8px 0 0;font-size:12.5px;line-height:1.45;color:#5a463c}
+.welcome .wfesta .fest-cta{background:linear-gradient(180deg,#e3c46f,#b08d3c);color:#fff;font-weight:700}
 .dir-estado{font-style:normal;font-size:10px;letter-spacing:.04em;color:#8c6d2f;background:rgba(201,162,74,.18);padding:2px 7px;border-radius:999px}
 
 @media (max-width:720px){
-  .fest-pasillo-bar{display:none !important}
-  .proximamente .prx-card b{font-size:22px}
+  .fest-pasillo-bar{max-width:min(96%,420px);padding:6px 12px;font-size:11px;bottom:max(70px, calc(env(safe-area-inset-bottom, 0px) + 58px))}
+  .fest-pasillo-bar b{font-size:12px}
+  .proximamente{padding:12px}
+  .proximamente .prx-card{width:min(340px,86vw);max-width:86vw;padding:18px 16px 16px}
+  .proximamente .prx-card small{letter-spacing:.08em;font-size:10px}
+  .proximamente .prx-card b{font-size:20px}
   .remodelacion-placa{min-width:28%;max-width:42%;padding:8px 10px}
   .puco-trend{font-size:8px;padding:2px 5px;top:3px;left:3px}
 }
@@ -1783,3 +1787,51 @@ body.tienda-puco .puco-destacados.vitrina-destacada .puco-vitrina-head{display:f
   .holo-set{transition:none}
 }
 
+
+
+/* ---------- Inscripción gratis Aesthetic Fest ---------- */
+#festInscripcion{padding:22px 20px 30px;display:flex;flex-direction:column;gap:10px;background:linear-gradient(180deg,#fbf6ec,#f3e6c8);color:var(--ink)}
+#festInscripcion h2{font-family:var(--serif);font-size:28px;color:#7a5a1e;line-height:1.15;margin:2px 0 0}
+#festInscripcion .eyebrow{color:#8c6d2f}
+#festInscripcion label{display:flex;flex-direction:column;gap:4px;font-size:13px;font-weight:600}
+#festInscripcion label i,#festInscripcion legend i{font-weight:400;color:#8a6f62}
+#festInscripcion input[type="text"],
+#festInscripcion input[type="tel"],
+#festInscripcion input[type="email"],
+#festInscripcion input:not([type]),
+#festInscripcion select{
+  font:inherit;font-size:16px;padding:11px 12px;border:1px solid #d8c9b0;border-radius:10px;background:#fff;color:var(--ink);width:100%;
+}
+#festInscripcion .ehfecha{margin:0 0 4px;font-family:var(--serif);font-size:16px;color:#8c6d2f}
+#festInscripcion .fest-set{border:1px solid rgba(201,162,74,.45);border-radius:14px;padding:12px 12px 8px;background:rgba(255,253,248,.7);margin:0}
+#festInscripcion .fest-set legend{font-size:13px;font-weight:700;color:#5a3f12;padding:0 6px}
+#festInscripcion .fest-ops{display:flex;flex-direction:column;gap:6px;margin:6px 0 4px}
+#festInscripcion .fest-ops label{display:flex;flex-direction:row;align-items:flex-start;gap:10px;font-weight:600;font-size:14px;color:var(--ink);cursor:pointer;line-height:1.35}
+#festInscripcion .fest-ops input{width:18px;height:18px;margin-top:1px;flex:none;accent-color:#8c6d2f}
+#festInscripcion .fest-consent{display:flex;flex-direction:row;align-items:flex-start;gap:10px;font-size:13px;font-weight:600;line-height:1.4;margin-top:4px}
+#festInscripcion .fest-consent input{width:18px;height:18px;margin-top:2px;flex:none;accent-color:#8c6d2f}
+#festInscripcion .primary{margin-top:6px}
+#festInscripcion .primary[disabled]{opacity:.65;cursor:wait}
+#festInscripcion .fine{margin-top:4px}
+#festGracias{text-align:center;display:flex;flex-direction:column;align-items:center;gap:8px;padding:10px 4px 8px}
+#festGracias .fest-check{
+  width:64px;height:64px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(180deg,#f7e7a8,#d9b45a);color:#5a3f12;
+  font-size:32px;font-weight:700;margin:8px 0 4px;
+  box-shadow:0 8px 20px rgba(176,141,60,.35);
+}
+#festGracias h2{text-align:center}
+#festGracias .turintro{text-align:center;max-width:34em}
+#festGracias .fest-nro{margin:8px 0 12px;font-size:14px;color:#5a463c}
+#festGracias .fest-nro b{display:block;margin-top:4px;font-family:var(--serif);font-size:22px;color:#7a5a1e;letter-spacing:.04em}
+
+body.fest-insc-open .scrim{z-index:40}
+body.fest-insc-open #festInscripcion{z-index:41}
+
+#stage > .proximamente.fest,#festPrx{
+  position:absolute;inset:0;z-index:7;padding:16px;
+  display:flex;align-items:center;justify-content:center;
+  pointer-events:none;background:linear-gradient(180deg,rgba(43,33,27,.28),rgba(43,33,27,.55));
+}
+#festPrx .prx-card{width:min(420px, calc(100% - 24px));max-width:calc(100% - 24px)}

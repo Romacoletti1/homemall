@@ -115,14 +115,30 @@ const TIENDAS_ESTADO = {
 
 const AESTHETIC_FEST = {
   titulo: "Aesthetic Fest",
-  fechasCorto: "11–23 dic",
-  fechasLargo: "11 al 23 de diciembre de 2026",
+  fechasCorto: "Fecha por anunciar",
+  fechasLargo: "Fecha por anunciar",
   lugar: "Centro de Convenciones Home Mall",
-  cinta: "Descuentos exclusivos en cada especialidad",
-  preop: "Con preoperatorio completo: evaluación preoperatoria gratuita y luego agendas con quien quieras",
+  cinta: "Charlas gratuitas de contorno corporal",
+  preop: "Inscripción gratis. No se solicita ningún pago.",
   whatsapp: "51948042949",
-  mensaje: "Hola, vengo de Home Mall. Quiero que me avisen / quiero participar en Aesthetic Fest, del 11 al 23 de diciembre de 2026, en el Centro de Convenciones Home Mall. Descuentos exclusivos en cada especialidad, con preoperatorio completo: evaluación preoperatoria gratuita y luego agendas con quien quieras."
+  mensaje: "Hola, vengo de Home Mall. Quiero inscribirme a las charlas gratuitas del Aesthetic Fest (fecha por anunciar), en el Centro de Convenciones Home Mall.",
+  /* Inscripciones: se envían a romacoletti2016@gmail.com por FormSubmit (mismo alias que los pedidos PuCo). */
+  tipos: [
+    { id: "paciente", label: "Paciente" },
+    { id: "medico", label: "Médico" },
+    { id: "otro-salud", label: "Otro profesional de salud" }
+  ],
+  charlas: [
+    { id: "contorno", label: "Técnicas quirúrgicas de contorno corporal" },
+    { id: "protesis", label: "Prótesis y otros materiales" },
+    { id: "anestesia", label: "Anestesia" },
+    { id: "dolor", label: "Terapia del dolor" },
+    { id: "preoperatorio", label: "Lectura del preoperatorio" }
+  ]
 };
+
+/* Mismo buzón FormSubmit que los pedidos PuCo Tech. El asunto distingue la inscripción. */
+const FEST_INSCRIPCION_RELAY = PUCO_PEDIDO_RELAY;
 
 /* Tipos de videoconsulta. "metodos": "enlace" = botón de pago con link · "yape" = Yape */
 const TIPOS_VIDEOCONSULTA = [
@@ -514,11 +530,11 @@ const TIENDAS = [
     rubro: "Eventos y ferias en Home Mall", whatsapp: "51948042949",
     tema: { a: "#7a5c2e", b: "#d9bf7a" },
     evento: {
-      eyebrow: "Próximamente · 11 al 23 de diciembre de 2026",
+      eyebrow: "Próximamente · Fecha por anunciar",
       titulo: "Aesthetic Fest",
       subtitulo: "Feria de Estética",
       cinta: "Descuentos exclusivos en cada especialidad",
-      fecha: "11 al 23 de diciembre de 2026",
+      fecha: "Fecha por anunciar",
       banner: { x: 50, y: 21, w: 21.2, h: 10 },
       pantallaCentral: { x: 50, y: 56.5, w: 14.5, h: 20 },
       mensajeStand: "Hola, vengo de Home Mall. Quiero un stand en Aesthetic Fest — Feria de Estética.",
@@ -531,10 +547,10 @@ const TIENDAS = [
       },
       botones: [
         { id: "asistir", texto: "Avisarme / Quiero participar",
-          mensaje: "Hola, vengo de Home Mall. Quiero que me avisen / quiero participar en Aesthetic Fest, del 11 al 23 de diciembre de 2026, en el Centro de Convenciones Home Mall. Descuentos exclusivos en cada especialidad, con preoperatorio completo: evaluación preoperatoria gratuita y luego agendas con quien quieras." }
+          mensaje: "Hola, vengo de Home Mall. Quiero inscribirme a las charlas gratuitas del Aesthetic Fest (fecha por anunciar), en el Centro de Convenciones Home Mall." }
       ]
     },
-    salas: [{ id: "salon", nombre: "Salón principal", sub: "Próximamente: Aesthetic Fest, 11–23 dic 2026", img: "assets/img/tiendas/convenciones.jpg" }],
+    salas: [{ id: "salon", nombre: "Salón principal", sub: "Próximamente: Aesthetic Fest · Fecha por anunciar", img: "assets/img/tiendas/convenciones.jpg" }],
     productos: [
       { id: "st-1", nombre: "Stand disponible", precio: null, stand: true, x: 16, y: 58,
         booth: { x: 16, y: 54, w: 8, h: 22 },

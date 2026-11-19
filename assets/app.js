@@ -97,9 +97,125 @@
   }
   function enObras(t) { return estadoDe(t) === "construccion"; }
   function puedeComprar(t) { return estadoDe(t) === "abierta"; }
+  const FEST_INSC_SEQ_KEY = "hm-fest-insc-seq";
+  const FEST_HASHES = { "inscripcion-fest": true, "aesthetic-fest": true };
+  function nroInscripcionFest() {
+    const d = new Date();
+    const pad = (n) => String(n).padStart(2, "0");
+    const ymd = String(d.getFullYear()).slice(2) + pad(d.getMonth() + 1) + pad(d.getDate());
+    const rnd = Math.random().toString(36).slice(2, 6).toUpperCase();
+    return "AF-" + ymd + "-" + rnd;
+  }
+  function nextLocalFestCount() {
+    let n = 0;
+    try { n = parseInt(localStorage.getItem(FEST_INSC_SEQ_KEY) || "0", 10) || 0; } catch (e) {}
+    n += 1;
+    try { localStorage.setItem(FEST_INSC_SEQ_KEY, String(n)); } catch (e) {}
+    return n;
+  }
+  function correoOk(s) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(s || "").trim()); }
+  function pintarFestOpciones() {
+    const tipos = (FEST && FEST.tipos) || [];
+    const charlas = (FEST && FEST.charlas) || [];
+    const tBox = $("#festTipos"), cBox = $("#festTemas");
+    if (tBox && !tBox.dataset.ready) {
+      tBox.innerHTML = tipos.map((x, i) => `<label><input type="radio" name="festTipo" value="${esc(x.label)}"${i === 0 ? "" : ""}> ${esc(x.label)}</label>`).join("");
+      tBox.dataset.ready = "1";
+    }
+    if (cBox && !cBox.dataset.ready) {
+      cBox.innerHTML = charlas.map((x) => `<label><input type="checkbox" name="festTema" value="${esc(x.label)}"> ${esc(x.label)}</label>`).join("");
+      cBox.dataset.ready = "1";
+    }
+  }
+  function abrirFestInscripcion() {
+    if (!$("#festInscripcion")) return;
+    pintarFestOpciones();
+    if ($("#wfestaFecha") && FEST) $("#wfestaFecha").textContent = FEST.fechasLargo || "Fecha por anunciar";
+    if ($("#festFecha")) $("#festFecha").textContent = (FEST && FEST.fechasLargo) || "Fecha por anunciar";
+    $("#festFormWrap").hidden = false;
+    $("#festGracias").hidden = true;
+    if ($("#festErr")) $("#festErr").textContent = "";
+    if ($("#festEnviar")) $("#festEnviar").disabled = false;
+    abrir("#festInscripcion");
+    document.body.classList.add("fest-insc-open");
+  }
+  async function enviarFestInscripcion() {
+    const err = $("#festErr");
+    const btn = $("#festEnviar");
+    if (err) err.textContent = "";
+    const nombre = ($("#festNombre") && $("#festNombre").value || "").trim();
+    const celRaw = ($("#festCelular") && $("#festCelular").value || "").trim();
+    const cel = celPE(celRaw);
+    const correo = ($("#festCorreo") && $("#festCorreo").value || "").trim();
+    const tipoEl = document.querySelector('input[name="festTipo"]:checked');
+    const temas = [...document.querySelectorAll('input[name="festTema"]:checked')].map((x) => x.value);
+    const consent = !!( $("#festConsent") && $("#festConsent").checked );
+    if (!nombre) { if (err) err.textContent = "Escribe tu nombre."; return; }
+    if (!cel) { if (err) err.textContent = "Ingresa un celular de WhatsApp de 9 dígitos (Perú)."; return; }
+    if (correo && !correoOk(correo)) { if (err) err.textContent = "Revisa el correo, o déjalo en blanco."; return; }
+    if (!tipoEl) { if (err) err.textContent = "Elige si te inscribes como paciente, médico u otro profesional de salud."; return; }
+    if (!temas.length) { if (err) err.textContent = "Marca al menos un tema de interés."; return; }
+    if (!consent) { if (err) err.textContent = "Para inscribirte, autoriza que te contactemos."; return; }
+    const endpoint = (typeof FEST_INSCRIPCION_RELAY !== "undefined" && String(FEST_INSCRIPCION_RELAY || "").trim())
+      || (typeof PUCO_PEDIDO_RELAY !== "undefined" && String(PUCO_PEDIDO_RELAY || "").trim())
+      || "";
+    if (!endpoint) { if (err) err.textContent = "No se pudo enviar ahora. Inténtalo de nuevo en unos minutos."; return; }
+    const codigo = nroInscripcionFest();
+    const nroLocal = nextLocalFestCount();
+    const ahora = new Date().toLocaleString("es-PE", { timeZone: "America/Lima", dateStyle: "short", timeStyle: "short" });
+    const payload = {
+      _subject: "Inscripción Aesthetic Fest " + codigo,
+      _template: "table",
+      _captcha: "false",
+      _honey: "",
+      codigo: codigo,
+      nro_local_este_navegador: String(nroLocal),
+      nombre: nombre,
+      celular: cel,
+      correo: correo || "(no indicó)",
+      tipo: tipoEl.value,
+      temas: temas.join(", "),
+      consentimiento: "Sí, autoriza ser contactado(a)",
+      evento: "Aesthetic Fest",
+      fecha_evento: (FEST && FEST.fechasLargo) || "Fecha por anunciar",
+      enviado: ahora + " (hora de Lima)",
+      nota_conteo: "Este correo es el registro oficial. El nro_local_este_navegador solo cuenta envíos en este dispositivo; no es el total de inscritos."
+    };
+    if (correo) payload._replyto = correo;
+    if (btn) { btn.disabled = true; btn.textContent = "Enviando…"; }
+    try {
+      const res = await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify(payload),
+        mode: "cors"
+      });
+      let ok = res.ok;
+      try {
+        const j = await res.json();
+        if (j && (j.success === "false" || j.success === false)) ok = false;
+        if (j && (j.success === "true" || j.success === true)) ok = true;
+      } catch (e) { /* algunos alias responden 200 sin JSON */ }
+      if (!ok) throw new Error("formsubmit");
+      $("#festCodigo").textContent = codigo;
+      $("#festFormWrap").hidden = true;
+      $("#festGracias").hidden = false;
+      try {
+        const cli = JSON.parse(localStorage.getItem(CLIENT_KEY) || "{}");
+        cli.nombre = cli.nombre || nombre;
+        cli.celular = cli.celular || cel;
+        localStorage.setItem(CLIENT_KEY, JSON.stringify(cli));
+      } catch (e) {}
+    } catch (e) {
+      /* El nro local ya se incrementó; no lo revertimos para no reutilizar códigos de prueba. */
+      if (err) err.textContent = "No se pudo enviar. Revisa tu conexión e inténtalo de nuevo. No se ha registrado un pago: la inscripción es gratis.";
+    } finally {
+      if (btn) { btn.disabled = false; btn.textContent = "Enviar inscripción"; }
+    }
+  }
   function festWa() {
-    if (!FEST) return;
-    window.open(wa(String(FEST.whatsapp || "51948042949").replace(/\D/g, ""), FEST.mensaje), "_blank", "noopener");
+    /* La participación del público va a la inscripción gratis, no a WhatsApp ni a un pago. */
+    abrirFestInscripcion();
   }
   function pucoStem(prod) {
     const src = (prod && prod.img) || "";
@@ -138,13 +254,16 @@
     const el = document.createElement("div");
     el.className = "proximamente" + (t.id === "convenciones" ? " fest" : "");
     if (t.id === "convenciones" && FEST) {
+      el.id = "festPrx";
       el.innerHTML = `<div class="prx-card fest">
         <small>Centro de Convenciones Home Mall</small>
-        <b>Próximamente: Aesthetic Fest, 11–23 dic</b>
-        <p>${esc(FEST.fechasLargo)} · ${esc(FEST.cinta)}. ${esc(FEST.preop)}.</p>
-        <button type="button" class="fest-cta">Avisarme / Quiero participar</button>
+        <b>Aesthetic Fest · Inscripción gratis</b>
+        <p>${esc(FEST.fechasLargo)}. Charlas gratuitas de contorno corporal. No se solicita ningún pago.</p>
+        <button type="button" class="fest-cta">Inscripción gratis</button>
       </div>`;
-      el.querySelector(".fest-cta").onclick = (ev) => { ev.stopPropagation(); festWa(); };
+      el.querySelector(".fest-cta").onclick = (ev) => { ev.stopPropagation(); abrirFestInscripcion(); };
+      stage.appendChild(el);
+      return;
     } else {
       el.innerHTML = `<div class="prx-card">
         <small>${esc(nombreTienda(t))}</small>
@@ -186,7 +305,7 @@
     if (e === "construccion") {
       t.enConstruccion = true;
       t.sinCompra = true;
-      if (t.id === "convenciones") t.banner = "Próximamente: Aesthetic Fest, 11–23 dic";
+      if (t.id === "convenciones") t.banner = "Aesthetic Fest · Fecha por anunciar";
       else if (!t.banner) t.banner = "En construcción";
     }
     if (e === "parcial" && t.id === "laboratorio") t.sinCompra = true;
@@ -1239,6 +1358,7 @@
 
   function pintarSpots() {
     spots.innerHTML = "";
+    const oldFestPrx = $("#festPrx"); if (oldFestPrx) oldFestPrx.remove();
     if (holoTimer) { clearInterval(holoTimer); holoTimer = 0; }
     Object.keys(holoSets).forEach((k) => { delete holoSets[k]; });
     if (escena.tipo === "pasillo") {
@@ -1292,7 +1412,7 @@
         s.innerHTML = t.esTemporada ? `<small>Tienda de Temporada</small><b>${esc(CAMP.letrero)}</b>`
           : t.soloCita ? `<b>${esc(t.letreroCorto || t.nombre)}</b><small>Cirugía Plástica</small>`
           : v.kiosko ? `<b>${esc(t.letreroCorto || t.nombre)}</b><small>Hechos a mano</small>`
-          : v.colgante ? `<small>Próximamente: Aesthetic Fest, 11–23 dic</small><b>${esc(t.letreroCorto || t.nombre)}</b>`
+          : v.colgante ? `<small>Aesthetic Fest · Fecha por anunciar</small><b>${esc(t.letreroCorto || t.nombre)}</b>`
           : `<b>${esc(t.letreroCorto || t.nombre)}</b>`;
         if (v.colgante) s.addEventListener("click", (e) => { if (movido) return; e.stopPropagation(); entrar(t.id); });
         if (t.id === "matteo" && pucoPremiumActivo()) {
@@ -1342,7 +1462,7 @@
           const ribbon = document.createElement("div");
           ribbon.className = "vitrina-cinta" + (t.id === "convenciones" ? " fest" : "");
           ribbon.innerHTML = t.id === "convenciones"
-            ? "<b>Próximamente: Aesthetic Fest, 11–23 dic</b>"
+            ? "<b>Aesthetic Fest · Fecha por anunciar</b>"
             : "<b>En construcción</b>";
           if (v.vitrina) {
             Object.assign(ribbon.style, { left: (v.vitrina.x + v.vitrina.w / 2) + "%", top: (v.vitrina.y + 8) + "%", width: Math.min(v.vitrina.w, 22) + "%" });
@@ -1578,7 +1698,7 @@
     if (ctaSedes) ctaSedes.hidden = true;
     if (cta) cta.hidden = false;
     if (!t) { cta.textContent = "🗺️ Directorio"; cta.onclick = () => abrir("#directorio"); cta.className = "cta"; }
-    else if (t.evento) { cta.textContent = "✦ Avisarme / Quiero participar"; cta.onclick = festWa; cta.className = "cta"; }
+    else if (t.evento) { cta.textContent = "✦ Inscripción gratis"; cta.onclick = () => abrirFestInscripcion(); cta.className = "cta lux"; }
     else if (enObras(t)) { cta.textContent = "Próximamente"; cta.onclick = () => toast("Esta tienda está en construcción"); cta.className = "cta"; }
     else if (t.turismo) { cta.textContent = "✈ Solicitar tratamiento"; cta.onclick = () => abrirTurismo(t); cta.className = "cta"; }
     else if (t.id === "laboratorio" && estadoDe(t) === "parcial") {
@@ -1619,8 +1739,8 @@
     if (!fb) { fb = document.createElement("button"); fb.id = "festPasilloBar"; fb.className = "fest-pasillo-bar"; fb.type = "button"; stage.appendChild(fb); }
     if (!t && FEST) {
       fb.hidden = false;
-      fb.innerHTML = `<b>Aesthetic Fest</b><span>${esc(FEST.fechasLargo)}</span><i>Avisarme / Quiero participar</i>`;
-      fb.onclick = festWa;
+      fb.innerHTML = `<b>Aesthetic Fest</b><span>${esc(FEST.fechasLargo)}</span><i>Inscripción gratis</i>`;
+      fb.onclick = (ev) => { ev.preventDefault(); ev.stopPropagation(); abrirFestInscripcion(); };
     } else { fb.hidden = true; }
   }
 
@@ -1770,7 +1890,7 @@
 
   /* ---------- Capas ---------- */
   function abrir(sel) { cerrarTodo(); $(sel).classList.add("open"); $("#scrim").classList.add("on"); }
-  function cerrarTodo() { pararVideos(); document.querySelectorAll(".layer.open").forEach((l) => l.classList.remove("open")); $("#scrim").classList.remove("on"); }
+  function cerrarTodo() { pararVideos(); document.body.classList.remove("fest-insc-open"); document.querySelectorAll(".layer.open").forEach((l) => l.classList.remove("open")); $("#scrim").classList.remove("on"); }
   document.querySelectorAll("[data-close]").forEach((b) => (b.onclick = cerrarTodo));
 
   if ($("#buzonBtn")) $("#buzonBtn").onclick = abrirBuzon;
@@ -2218,8 +2338,11 @@
     setTimeout(() => { w.classList.add("gone"); }, 1100);
     setTimeout(() => w.classList.remove("abriendo", "cruzando"), 1900);
   }
+  if ($("#wfestaFecha") && FEST) $("#wfestaFecha").textContent = FEST.fechasLargo || "Fecha por anunciar";
   const festBtn = $("#festAvisar");
-  if (festBtn) festBtn.onclick = (e) => { e.preventDefault(); e.stopPropagation(); festWa(); };
+  if (festBtn) festBtn.onclick = (e) => { e.preventDefault(); e.stopPropagation(); abrirFestInscripcion(); };
+  if ($("#festEnviar")) $("#festEnviar").onclick = () => { enviarFestInscripcion(); };
+  if ($("#festGraciasCerrar")) $("#festGraciasCerrar").onclick = () => cerrarTodo();
   $("#startTour").onclick = abrirPuerta;
   $("#perilla").onclick = (e) => { e.stopPropagation(); abrirPuerta(); };
   $("#puerta").onclick = abrirPuerta;
@@ -2236,10 +2359,12 @@
     else if (tiendaPorId[tid] && tiendaPorId[tid].salas) { ini = { tipo: "tienda", t: tid, s: Math.max(0, tiendaPorId[tid].salas.findIndex((s) => s.id === sid)) }; $("#welcome").classList.add("gone"); }
   }
   if (h === "visa" || h === "turismo/secreto") { ini = { tipo: "tienda", t: "turismo", s: 0 }; $("#welcome").classList.add("gone"); setTimeout(() => abrirSecreto(tiendaPorId.turismo), 900); }
+  if (FEST_HASHES[h]) { $("#welcome").classList.add("gone"); setTimeout(() => abrirFestInscripcion(), 200); }
 
   window.addEventListener("hashchange", () => {
     const h = decodeURIComponent(location.hash.slice(1) || "");
     if (!h) return;
+    if (FEST_HASHES[h]) { abrirFestInscripcion(); return; }
     const pi = PASILLOS.findIndex((p) => p.id === h);
     if (pi >= 0) { if (escena.tipo !== "pasillo" || escena.i !== pi) ir({ tipo: "pasillo", i: pi }, "fwd"); return; }
     const [tid, sid] = h.split("/");
