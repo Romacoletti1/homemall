@@ -15,8 +15,8 @@
 <link rel="apple-touch-icon" href="assets/img/marca/icono-180.png">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="preload" as="image" href="assets/img/marca/portada-home-mall.webp" type="image/webp">
-<link rel="stylesheet" href="assets/fuentes.css?v=20261118b">
-<link rel="stylesheet" href="assets/estilos.css?v=20261118b">
+<link rel="stylesheet" href="assets/fuentes.css?v=20261118i">
+<link rel="stylesheet" href="assets/estilos.css?v=20261118i">
 </head>
 <body>
 <header class="top">
@@ -51,6 +51,11 @@
     </div>
   </div>
   <section class="puco-destacados" id="pucoDestacados" hidden>
+    <div class="puco-temp-banner" id="pucoTempBanner" hidden></div>
+    <header class="puco-vitrina-head">
+      <span class="premium-badge">Premium</span>
+      <p class="puco-vitrina-kicker">Vitrina destacada</p>
+    </header>
     <button type="button" class="puco-semana" id="pucoSemana">
       <img src="assets/img/productos/puco/semana-tripode.png" alt="Producto de la semana: Trípode C12 AI Tracking 1.8 m a S/ 129.90. Envío gratis desde S/ 200">
       <span class="psem-badge">🔥 Producto de la semana · Envío gratis desde S/ 200</span>
@@ -394,6 +399,7 @@
       <p class="pedido-n">Pedido <b id="ckPedidoN"></b></p>
       <div class="pgmonto"><span>Total a pagar</span><strong id="ckMonto"></strong></div>
       <div class="pgres" id="ckResumen"></div>
+      <div class="ck-pagos" id="ckPagosRow">
       <div class="pgbox" id="ckYapeBox">
         <h4>Yape / Plin</h4>
         <p class="yape" id="ckYapeTxt"></p>
@@ -402,6 +408,14 @@
         <label>N° de operación Yape/Plin <em>(opcional)</em>
           <input id="cYapeOp" inputmode="numeric" autocomplete="off" placeholder="Si ya pagaste, anota el número">
         </label>
+      </div>
+      <div class="pgbox" id="ckPaypalBox" hidden>
+        <h4>Tarjeta o PayPal</h4>
+        <p class="fine l">Puedes pagar con tarjeta de débito o crédito, sin necesidad de una cuenta PayPal.</p>
+        <p class="yape" id="ckPaypalTxt"></p>
+        <button type="button" class="paypal-btn" id="ckPaypalPagar">Pagar con tarjeta o PayPal</button>
+        <p class="fine">Después de pagar, toca «Ya pagué» y adjunta el comprobante en WhatsApp.</p>
+      </div>
       </div>
       <button class="wa" id="ckYaPague" type="button">Ya pagué – enviar pedido por WhatsApp</button>
       <p class="fine">En WhatsApp adjunta la captura de tu pago para que confirmemos tu pedido.</p>
@@ -515,10 +529,10 @@
 </div>
 
 <div class="toast" id="toast" role="status"></div>
-<script src="assets/catalogo-puco.js?v=20261118b"></script>
-<script src="assets/catalogo.js?v=20261118b"></script>
-<script src="assets/citas-comun.js?v=20261118b"></script>
-<script src="assets/app.js?v=20261118b"></script>
-<script src="assets/puco-tienda.js?v=20261118b"></script>
+<script src="assets/catalogo-puco.js?v=20261118i"></script>
+<script src="assets/catalogo.js?v=20261118i"></script>
+<script src="assets/citas-comun.js?v=20261118i"></script>
+<script src="assets/app.js?v=20261118i"></script>
+<script src="assets/puco-tienda.js?v=20261118i"></script>
 </body>
 </html>

@@ -49,9 +49,16 @@ const PAGO = {
 
 /* PuCo Tech — Yape/Plin de la tienda (NO uses el Yape de la clínica 915 124 360).
    Vacío = en el paso de pago se muestra «Próximamente». Completa el número cuando lo tengas. */
-const PUCO_YAPE_NUMERO = "";    // ej.: "9XX XXX XXX"  (Yape / Plin de PuCo Tech)
-const PUCO_YAPE_TITULAR = "";   // opcional: nombre que aparece en Yape/Plin
-const PUCO_YAPE_QR = "";        // opcional: ruta del QR (ej.: "assets/img/pago/qr-puco-yape.png")
+const PUCO_YAPE_NUMERO = "948 042 949";  // Yape / Plin de PuCo Tech
+const PUCO_YAPE_TITULAR = "Rocio Coletti";  // exactamente como aparece en Yape
+const PUCO_YAPE_QR = "";        // aún no hay QR; el checkout funciona sin él
+
+/* PuCo Tech — PayPal Payments Standard (sin API) para pagar con tarjeta o PayPal.
+   La lista oficial de monedas de Payments Standard no incluye soles (PEN),
+   así que el cobro se envía en USD al tipo de cambio referencial de abajo. */
+const PUCO_PAYPAL_EMAIL = "romacoletti2016@gmail.com";
+const PUCO_PAYPAL_MONEDA = "USD";
+const PUCO_PAYPAL_TC_PEN_POR_USD = 3.42; // referencial, 18 nov 2026 (America/Lima); ~3.41939 open.er-api.com
 
 /* Copia silenciosa de cada pedido PuCo Tech a Gmail (FormSubmit, sin backend).
    Tras el primer envío, FormSubmit pide activar el formulario por correo.
@@ -136,6 +143,70 @@ const TIPOS_VIDEOCONSULTA = [
 const CAMPAÑA_ACTIVA = "navidad";   // ← "navidad" | "sanvalentin" | "madre" | "patrias" | "halloween"
 const CAMBIO_AUTOMATICO = false;    // true = elige la campaña según las fechas de cada una (abajo)
 
+/* Plan Premium de PuCo Tech (tienda id "matteo"): vitrina destacada, cambios de
+   temporada y prioridad en el pasillo. Para rotar el banner, cambia
+   PUCO_PREMIUM.temporada a una clave de PUCO_TEMPORADAS (o un objeto
+   { titulo, subtitulo }). No altera precios. */
+const PUCO_TEMPORADAS = {
+  "navidad-verano": { titulo: "Especial Navidad", subtitulo: "Temporada de verano en Lima · dic 2026" },
+  "verano":         { titulo: "Temporada de verano", subtitulo: "Lima · calor y aire fresco" },
+  "navidad":        { titulo: "Especial Navidad", subtitulo: "dic 2026" },
+  "madre":          { titulo: "Día de la Madre", subtitulo: "" },
+  "patrias":        { titulo: "Fiestas Patrias", subtitulo: "" }
+};
+const PUCO_PREMIUM = {
+  activo: true,
+  plan: "Premium",
+  vitrinaDestacada: true,
+  prioridadPasillo: true,
+  hologramas: true,
+  temporada: "navidad-verano",   // ← cambia esta clave para rotar el banner
+  /* Fotos que flotan en el pasillo. motivo = por qué está (solo razones reales del
+     catálogo o un texto que tú definas; no inventes descuentos ni “best seller”). */
+  destacados: [
+    { id: "puco-102", nombre: "Trípode C12 AI", motivo: "Producto de la semana · −16%" }, // productoSemana + descuentoPct 16 (S/ 154.90 → S/ 129.90)
+    { id: "puco-106", nombre: "Ventilador de cuello", motivo: "Protagonista del mes" },         // protagonistaMes
+    { id: "puco-107", nombre: "Aspiradora de mano", motivo: "Protagonista del mes" }          // protagonistaMes
+  ]
+};
+
+/* Plan Premium del carrito Amigurumis: marco dorado, distintivo PREMIUM y
+   hologramas con textura de crochet (paleta pastel del carrito, no el brillo
+   cian de PuCo Tech). Cambia destacados para rotar lo que flota; los precios
+   salen del catálogo. hologramas: false los apaga sin quitar el marco Premium. */
+const AMIGURUMIS_PREMIUM = {
+  activo: true,
+  plan: "Premium",
+  vitrinaDestacada: true,
+  hologramas: true,
+  /* motivo = por qué está en la vitrina (cámbialo tú; no pongas descuentos ni
+     “best seller” si no están en el catálogo). */
+  destacados: [
+    { id: "ami-1", motivo: "Destacado" },
+    { id: "ami-2", motivo: "Destacado" },
+    { id: "ami-4", motivo: "Destacado" },
+    { id: "ami-6", motivo: "Destacado" }
+  ]
+};
+
+/* Plan Premium de Roma Coletti (consultorio, Pasillo 1): marco dorado, distintivo
+   PREMIUM e imágenes flotantes con marco y haz de luz dorado (solo contorno
+   corporal y fotos de la clínica; nunca procedimientos de rostro ni antes/después).
+   Cambia destacados para rotar las imágenes. */
+const ROMA_PREMIUM = {
+  activo: true,
+  plan: "Premium",
+  vitrinaDestacada: true,
+  hologramas: true,
+  /* motivo = por qué flota (sin precios). Cámbialo tú. */
+  destacados: [
+    { img: "assets/img/tiendas/roma-premium/recepcion.jpg", titulo: "Recepción", motivo: "Agenda tu cita", id: "zona-agenda" },
+    { img: "assets/img/tiendas/roma-premium/tratamiento.jpg", titulo: "Lipoescultura", motivo: "Especialidad", id: "cx-1" },
+    { img: "assets/img/tiendas/roma-premium/espera.jpg", titulo: "Lipoabdominoplastia", motivo: "Especialidad", id: "cx-2" },
+    { img: "assets/img/tiendas/roma-premium/salon.jpg", titulo: "Mamas", motivo: "Especialidad", id: "cx-3" }
+  ]
+};
+
 /* ---------------------------- PASILLOS --------------------------------- */
 /* Cada vitrina: tienda = id de la tienda; letrero = posición del letrero; x,y = punto para entrar */
 /* Cartel del local libre (vitrina con alquiler: true en PASILLOS) */
@@ -180,10 +251,16 @@ const PASILLOS = [
     /* letrero: x/y = centro de la placa dorada de la foto, w/h = su tamaño (en % de la foto). La placa HTML la cubre. */
     /* Orden L→R: Roma Coletti, PuCo Tech, DIH Fajas, Arcalab. El carrito va en el piso, a la izquierda, sin tapar fachadas ni letreros. */
     /* Fachadas: van con el id de la tienda (tools/build_pasillos.py + assets/img/fachadas/), nunca con el número de slot. */
-    { tienda: "consultorio", letrero: { x: 14.2, y: 25.6, w: 20.4, h: 10.6 }, x: 14, y: 58 },
-    { tienda: "matteo",      letrero: { x: 38.3, y: 25.6, w: 19.6, h: 10.6 }, x: 38, y: 58 },
+    { tienda: "consultorio", letrero: { x: 14.2, y: 25.6, w: 20.4, h: 10.6 }, x: 14, y: 58,
+      /* Marco Premium de la fachada (left/top/w/h en % de la foto del pasillo). */
+      vitrina: { x: 3.15, y: 30.9, w: 21.9, h: 48.8 } },
+    { tienda: "matteo",      letrero: { x: 38.3, y: 25.6, w: 19.6, h: 10.6 }, x: 38, y: 58,
+      /* Marco de la vitrina destacada (Premium): left/top/w/h en % de la foto del pasillo. */
+      vitrina: { x: 27.4, y: 30.9, w: 22.5, h: 48.6 } },
     { tienda: "fajas",       letrero: { x: 61.6, y: 25.6, w: 19.2, h: 10.6 }, x: 67, y: 44 },
-    { tienda: "amigurumis",  kiosko: true, letrero: { x: 24.2, y: 68.3, w: 12 }, x: 24.2, y: 84.5 },
+    { tienda: "amigurumis",  kiosko: true, letrero: { x: 24.2, y: 68.3, w: 12 }, x: 24.2, y: 84.5,
+      /* Marco Premium del carrito (left/top/w/h en % de la foto del pasillo). */
+      vitrina: { x: 17.2, y: 59.2, w: 16.9, h: 31.4 } },
     { tienda: "laboratorio", letrero: { x: 85.5, y: 25.6, w: 20.4, h: 10.6 }, x: 86, y: 58 },
     { tienda: "convenciones", colgante: true, letrero: { x: 50, y: 14.0, w: 26, h: 8.0 }, x: 50, y: 14.0 }
   ]},
@@ -253,6 +330,7 @@ const TIENDAS = [
   },
   {
     id: "amigurumis", nombre: "Amigurumis", rubro: "Carrito de muñecos tejidos a mano", whatsapp: "51948042949",
+    plan: "Premium",
     tema: { a: "#7a5a7e", b: "#e8b4b8" },
     salas: [{ id: "carrito", nombre: "Carrito", sub: "Tejidos a crochet, uno por uno", img: "assets/img/tiendas/amigurumis-kiosko.jpg" }],
     productos: [
@@ -267,6 +345,7 @@ const TIENDAS = [
   },
   {
     id: "consultorio", nombre: "Roma Coletti", letreroCorto: "Roma Coletti", rubro: "Cirugía Plástica · Contorno Corporal", whatsapp: "51915124360",
+    plan: "Premium",
     soloCita: true,   // sin carrito ni precios: todo se solicita por WhatsApp
     lema: "Sé quien quieras ser", registro: "CMP 60940 · RNE 30051", web: "https://draromacoletti.com/",
     tema: { a: "#8c6d2f", b: "#d4af37" },
@@ -347,6 +426,7 @@ const TIENDAS = [
   {
     id: "matteo", nombre: "PuCo Tech", letreroCorto: "PuCo Tech",
     rubro: "Tecnología y accesorios importados", whatsapp: "51948042949",
+    plan: "Premium",
     tema: { a: "#2b211b", b: "#c9a24a" },
     descuento: 0.10,
     banner: "10% en toda la tienda",

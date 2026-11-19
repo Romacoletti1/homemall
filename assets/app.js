@@ -159,6 +159,27 @@
   window.estadoDe = estadoDe;
   window.festWa = festWa;
 
+  function pucoPremiumActivo() {
+    return typeof PUCO_PREMIUM !== "undefined" && PUCO_PREMIUM && PUCO_PREMIUM.activo !== false;
+  }
+  function pucoTemporada() {
+    if (!pucoPremiumActivo()) return null;
+    const key = PUCO_PREMIUM.temporada;
+    if (key && typeof key === "object") return key;
+    const map = typeof PUCO_TEMPORADAS !== "undefined" ? PUCO_TEMPORADAS : {};
+    return (key && map[key]) || null;
+  }
+  window.pucoPremiumActivo = pucoPremiumActivo;
+  window.pucoTemporada = pucoTemporada;
+  function amiPremiumActivo() {
+    return typeof AMIGURUMIS_PREMIUM !== "undefined" && AMIGURUMIS_PREMIUM && AMIGURUMIS_PREMIUM.activo !== false;
+  }
+  window.amiPremiumActivo = amiPremiumActivo;
+  function romaPremiumActivo() {
+    return typeof ROMA_PREMIUM !== "undefined" && ROMA_PREMIUM && ROMA_PREMIUM.activo !== false;
+  }
+  window.romaPremiumActivo = romaPremiumActivo;
+
   tiendas.forEach((t) => {
     const e = estadoDe(t);
     t.estado = e;
@@ -394,6 +415,7 @@
     return "PT-" + ymd + "-" + rnd;
   }
   let pedidoActual = null;
+  let paypalPago = null;
   function mensaje(g, cli, nro) {
     const puco = esPuco(g.t);
     const l = puco && nro
@@ -527,6 +549,38 @@
       $("#ckYapeTit").hidden = false;
     }
     if (qr && num) { $("#ckQR").src = qr; $("#ckQR").hidden = false; } else { $("#ckQR").hidden = true; $("#ckQR").removeAttribute("src"); }
+    const ppBox = $("#ckPaypalBox");
+    const ppEmail = (typeof PUCO_PAYPAL_EMAIL !== "undefined" && String(PUCO_PAYPAL_EMAIL || "").trim()) || "";
+    const ppSoles = pagar && pagar["S/"] != null ? Number(pagar["S/"]) : NaN;
+    paypalPago = null;
+    if (ppBox && ppEmail && ppSoles > 0) {
+      const monCode = (typeof PUCO_PAYPAL_MONEDA !== "undefined" && String(PUCO_PAYPAL_MONEDA || "").trim()) || "USD";
+      const tc = Number(typeof PUCO_PAYPAL_TC_PEN_POR_USD !== "undefined" ? PUCO_PAYPAL_TC_PEN_POR_USD : 0) || 3.42;
+      const usd = Math.round((ppSoles / tc) * 100) / 100;
+      const items = g.items.map((i) => {
+        const pr = PROD[i.id];
+        return (i.qty + "× " + (pr && pr.nombre ? pr.nombre : i.id) + (i.talla ? " talla " + i.talla : ""));
+      }).join(", ");
+      let itemName = "Pedido " + nro + " · PuCo Tech · " + items;
+      if (itemName.length > 127) itemName = itemName.slice(0, 124) + "…";
+      paypalPago = {
+        cmd: "_xclick",
+        business: ppEmail,
+        item_name: itemName,
+        item_number: nro,
+        amount: usd.toFixed(2),
+        currency_code: monCode,
+        charset: "utf-8",
+        no_shipping: "1",
+        no_note: "1",
+        lc: "es_XC"
+      };
+      $("#ckPaypalTxt").innerHTML = `Total en soles: <b>${fmtTot(pagar)}${extra}</b>. PayPal cobra en dólares: <b>US$ ${usd.toFixed(2)}</b> <span class="paypal-tc">(cambio referencial: S/ ${tc.toFixed(2)} por US$ 1)</span>`;
+      ppBox.hidden = false;
+    } else if (ppBox) {
+      ppBox.hidden = true;
+      if ($("#ckPaypalTxt")) $("#ckPaypalTxt").textContent = "";
+    }
     mostrarPasoCheckout(true);
   }
   function abrirCita(servicio) {
@@ -564,13 +618,12 @@
       const nw = img.naturalWidth || 1280, nh = img.naturalHeight || 720;
       const aspect = nw / nh;
       if (escena.tipo === "pasillo") {
-        /* Tiendas grandes: ~2 locales a la vista; el resto se recorre arrastrando o deslizando. */
-        const targetBays = 2.15;
+        /* Bahías más amplias para el pasillo Premium: menos locales a la vez, más aire entre vitrinas. */
+        const targetBays = 1.7;
         panoW = Math.max(sw * (4 / targetBays), sh * aspect * 1.02);
         panoH = panoW / aspect;
         /* No recortes tanto en vertical que desaparezcan letreros y el carrito a la vez. */
-        /* En pantalla apaisada (escritorio) se recorta menos en vertical para que entren el letrero colgante y el carrito. */
-        const visV = sw > sh ? 0.70 : 0.58;
+        const visV = sw > sh ? 0.52 : 0.56;
         if (panoH > sh / visV) { panoH = sh / visV; panoW = panoH * aspect; }
       } else {
         panoW = Math.max(sh * aspect, sw * 1.18);
@@ -606,6 +659,8 @@
     }
     pano.style.transform = `translate3d(${panX}px, ${panY}px, 0)`;
     encuadrarPronto();
+    actualizarHologramas();
+    if (pano.classList.contains("glide")) pedirHoloTick();
   }
   /* Mantiene las etiquetas de los puntos dentro de la pantalla (sobre todo en celular) */
   let encRaf = 0;
@@ -627,10 +682,8 @@
     panX = sw / 2 - panoW * fx;
     if (escena.tipo === "pasillo" && panoH > sh) {
       /* Arranca un poco más arriba para que se vean los letreros dorados; el piso se recorre en vertical. */
-      panY = -panoH * 0.20;
-      /* …pero sin esconder el letrero colgante del Centro de Convenciones (con sus cables, ~7.5% de la foto). */
-      const P = PASILLOS[escena.i], col = P && P.vitrinas.find((v) => v.colgante);
-      if (col) { const topCol = (col.letrero.y - (col.letrero.h || 8) / 2 - 3.5) / 100; panY = Math.max(panY, 8 - panoH * topCol); }
+      /* Bahías más amplias: priorizar letreros y vitrinas; el colgante se recorre un poco hacia arriba. */
+      panY = -panoH * 0.19;
     } else {
       panY = (sh - panoH) / 2;
     }
@@ -646,6 +699,11 @@
     const cargar = () => {
       img.onload = null; medir();
       let fx = 0.5;
+      if (e.tipo === "pasillo" && pucoPremiumActivo() && PUCO_PREMIUM.prioridadPasillo !== false) {
+        const P = PASILLOS[e.i];
+        const dest = P && (P.vitrinas || []).find((v) => v.tienda === "matteo");
+        if (dest && dest.x != null) fx = dest.x / 100;
+      }
       if (e.tipo === "tienda") {
         const ps = productosDeSala();
         const tnow = tiendaPorId[e.t];
@@ -973,8 +1031,216 @@
   $("#bQ").addEventListener("input", pintarBusqueda);
   function salir() { const t = tiendaActual(); ir({ tipo: "pasillo", i: t ? pasilloDe(t.id) : 0 }, "back"); }
 
+  let holoTimer = 0, holoRaf = 0;
+  const holoSets = {};
+  function holoMotivo(entry, p) {
+    if (entry && entry.motivo) return String(entry.motivo);
+    if (p && p.productoSemana) return "Producto de la semana";
+    if (p && p.protagonistaMes) return "Protagonista del mes";
+    return "";
+  }
+  function holoCaption(nombre, motivo) {
+    const name = esc(nombre || "");
+    const why = esc(motivo || "");
+    if (!name && !why) return "";
+    return `<span class="holo-cap">${name ? `<strong>${name}</strong>` : ""}${why ? `<em>${why}</em>` : ""}</span>`;
+  }
+  function pucoHoloItems(t) {
+    const items = [];
+    const cfg = (typeof PUCO_PREMIUM !== "undefined" && PUCO_PREMIUM && PUCO_PREMIUM.destacados) || [];
+    if (cfg.length) {
+      cfg.forEach((entry) => {
+        const p = entry && entry.id && PROD[entry.id];
+        if (!p) return;
+        items.push({ tipo: "producto", p, nombre: entry.nombre || p.nombre, motivo: holoMotivo(entry, p), tema: "tech" });
+      });
+      return items;
+    }
+    (t.productos || []).forEach((raw) => {
+      const p = PROD[raw.id];
+      if (!p) return;
+      if (p.productoSemana || p.protagonistaMes) {
+        items.push({ tipo: "producto", p, nombre: p.nombre, motivo: holoMotivo(null, p), tema: "tech" });
+      }
+    });
+    return items;
+  }
+  function amiHoloItems(t) {
+    const items = [];
+    const cfg = (typeof AMIGURUMIS_PREMIUM !== "undefined" && AMIGURUMIS_PREMIUM && AMIGURUMIS_PREMIUM.destacados) || [];
+    cfg.forEach((entry) => {
+      const id = typeof entry === "string" ? entry : entry && entry.id;
+      const p = id && PROD[id];
+      if (!p || p.tienda !== "amigurumis") return;
+      items.push({ tipo: "producto", p, nombre: (entry && entry.nombre) || p.nombre, motivo: holoMotivo(entry, p) || "Destacado", tema: "crochet" });
+    });
+    return items;
+  }
+  function romaHoloItems() {
+    const items = [];
+    const cfg = (typeof ROMA_PREMIUM !== "undefined" && ROMA_PREMIUM && ROMA_PREMIUM.destacados) || [];
+    cfg.forEach((entry) => {
+      if (!entry || !entry.img) return;
+      items.push({
+        tipo: "roma",
+        tema: "gold",
+        img: entry.img,
+        titulo: entry.titulo || entry.nombre || "Consultorio",
+        motivo: entry.motivo || "",
+        id: entry.id || null
+      });
+    });
+    return items;
+  }
+  function holoCard(item, tema) {
+    const theme = item.tema || tema || "tech";
+    const yarn = theme === "crochet";
+    const gold = theme === "gold";
+    const btn = document.createElement("button");
+    btn.type = "button";
+    if (gold || item.tipo === "roma") {
+      const nombre = item.titulo || "Roma Coletti";
+      btn.className = "roma-holo";
+      btn.setAttribute("aria-label", [nombre, item.motivo].filter(Boolean).join(" · "));
+      btn.innerHTML = `<span class="roma-beam" aria-hidden="true"></span><span class="roma-pedestal" aria-hidden="true"></span><span class="roma-frame"><img class="holo-fig" src="${esc(item.img || "")}" alt="${esc(nombre)}" loading="lazy" decoding="async" width="160" height="200">${holoCaption(nombre, item.motivo)}</span>`;
+      btn.addEventListener("click", (e) => {
+        if (movido) return;
+        e.stopPropagation();
+        if (item.id) abrirProducto(item.id);
+        else entrar("consultorio");
+      });
+      return btn;
+    }
+    const tex = yarn ? "holo-yarn" : "holo-scan";
+    if (item.tipo === "producto") {
+      const p = item.p;
+      const nombre = item.nombre || p.nombre;
+      btn.className = (yarn ? "ami-holo" : "puco-holo") + " prod";
+      btn.setAttribute("aria-label", [nombre, item.motivo].filter(Boolean).join(" · "));
+      const fig = yarn
+        ? `<img class="holo-fig" src="${esc(p.img || "")}" alt="${esc(nombre)}" loading="lazy" decoding="async" width="120" height="120">`
+        : pucoPicture(p, "tile", "holo-fig");
+      btn.innerHTML = `<span class="${tex}" aria-hidden="true"></span>${fig}${holoCaption(nombre, item.motivo)}`;
+      btn.addEventListener("click", (e) => { if (movido) return; e.stopPropagation(); abrirProducto(p.id); });
+    }
+    return btn;
+  }
+  function slotsVisibles() {
+    return 1;
+  }
+  function reduceMotion() {
+    return !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+  }
+  function mostrarHoloCiclo(instant) {
+    document.querySelectorAll(".holo-set").forEach((box) => {
+      const kind = box.dataset.kind;
+      const st = holoSets[kind];
+      if (!st || !st.items.length) return;
+      const slots = [...box.querySelectorAll(".holo-slot")];
+      const vis = slotsVisibles();
+      const n = st.items.length;
+      slots.forEach((sl, i) => {
+        sl.hidden = i >= vis;
+        if (i >= vis) return;
+        const item = st.items[(st.idx + i) % n];
+        const next = holoCard(item, st.tema);
+        if (instant || reduceMotion()) { sl.innerHTML = ""; sl.appendChild(next); }
+        else {
+          sl.classList.add("swap");
+          setTimeout(() => { sl.innerHTML = ""; sl.appendChild(next); sl.classList.remove("swap"); }, 260);
+        }
+      });
+      st.idx = (st.idx + vis) % n;
+    });
+  }
+  function pintarHologramas(root, v, t, kind) {
+    const tema = kind === "ami" ? "crochet" : kind === "roma" ? "gold" : "tech";
+    const items = kind === "ami" ? amiHoloItems(t) : kind === "roma" ? romaHoloItems() : pucoHoloItems(t);
+    if (!items.length) return;
+    const box = document.createElement("div");
+    const cls = kind === "ami" ? "ami-holos" : kind === "roma" ? "roma-holos" : "puco-holos";
+    box.className = cls + " holo-set";
+    box.dataset.kind = kind;
+    box.setAttribute("aria-label", kind === "ami" ? "Hologramas de Amigurumis" : kind === "roma" ? "Imágenes de Roma Coletti" : "Hologramas de PuCo Tech");
+    const vit = v.vitrina || { x: (v.letrero.x || 50) - (v.letrero.w || 16) / 2, y: (v.letrero.y || 30) + (v.letrero.h || 8) / 2, w: v.letrero.w || 16, h: 40 };
+    Object.assign(box.style, { left: vit.x + "%", top: vit.y + "%", width: vit.w + "%", height: vit.h + "%" });
+    for (let i = 0; i < 2; i++) {
+      const sl = document.createElement("div");
+      const slotCls = kind === "ami" ? " ami-holo-slot" : kind === "roma" ? " roma-holo-slot" : " puco-holo-slot";
+      sl.className = "holo-slot s" + i + slotCls;
+      box.appendChild(sl);
+    }
+    root.appendChild(box);
+    holoSets[kind] = { items, idx: 0, tema };
+  }
+  function iniciarHologramas() {
+    if (holoTimer) { clearInterval(holoTimer); holoTimer = 0; }
+    if (!document.querySelector(".holo-set")) return;
+    mostrarHoloCiclo(true);
+    if (!reduceMotion()) holoTimer = setInterval(() => mostrarHoloCiclo(false), 4200);
+    requestAnimationFrame(() => { actualizarHologramas(); pedirHoloTick(); });
+  }
+  function actualizarHologramas() {
+    const sr = stage.getBoundingClientRect();
+    const sw = stage.clientWidth;
+    const viewMid = (sr.left + sr.right) / 2;
+    const sets = document.querySelectorAll(".holo-set");
+    sets.forEach((box) => box.classList.remove("on"));
+    if (!sets.length) return;
+    const viewMidY = (sr.top + sr.bottom) / 2;
+    const lookingDown = panY < -panoH * 0.22;
+    /* Al borde izquierdo, si se mira la fachada, el consultorio es el de frente. */
+    const atLeft = panX >= -1;
+    if (atLeft && !lookingDown) {
+      const roma = document.querySelector(".roma-holos");
+      if (roma) {
+        const r = roma.getBoundingClientRect();
+        if (r.right > sr.left + 8 && r.left < sr.right - 8) { roma.classList.add("on"); return; }
+      }
+    }
+    /* El carrito está en el piso: en pantallas altas casi no hay recorrido vertical,
+       así que si es el más cercano en horizontal (y está a la vista), es su turno. */
+    const ami = document.querySelector(".ami-holos");
+    if (ami) {
+      const r = ami.getBoundingClientRect();
+      const amiIn = r.right > sr.left + 12 && r.left < sr.right - 12 && r.bottom > sr.top + 4 && r.top < sr.bottom;
+      const amiDx = Math.abs((r.left + r.right) / 2 - viewMid);
+      if (amiIn && (lookingDown || amiDx < sr.width * 0.28)) {
+        let closerH = false;
+        sets.forEach((box) => {
+          if (box === ami) return;
+          const o = box.getBoundingClientRect();
+          if (!(o.right > sr.left + 16 && o.left < sr.right - 16)) return;
+          const oDx = Math.abs((o.left + o.right) / 2 - viewMid);
+          if (oDx + 10 < amiDx) closerH = true;
+        });
+        if (!closerH) { ami.classList.add("on"); return; }
+      }
+    }
+    let best = null, bestDist = Infinity;
+    const limit = Math.hypot(sr.width, sr.height) * 0.30;
+    sets.forEach((box) => {
+      const r = box.getBoundingClientRect();
+      const inView = r.right > sr.left + 16 && r.left < sr.right - 16 && r.bottom > sr.top && r.top < sr.bottom;
+      if (!inView) return;
+      const dist = Math.hypot((r.left + r.right) / 2 - viewMid, ((r.top + r.bottom) / 2 - viewMidY) * 0.65);
+      if (dist <= limit && dist < bestDist) { bestDist = dist; best = box; }
+    });
+    if (best) best.classList.add("on");
+  }
+  function pedirHoloTick() {
+    if (holoRaf) return;
+    holoRaf = requestAnimationFrame(function tick() {
+      actualizarHologramas();
+      if (document.querySelector(".holo-set") && pano.classList.contains("glide")) holoRaf = requestAnimationFrame(tick);
+      else holoRaf = 0;
+    });
+  }
+
   function pintarSpots() {
     spots.innerHTML = "";
+    if (holoTimer) { clearInterval(holoTimer); holoTimer = 0; }
+    Object.keys(holoSets).forEach((k) => { delete holoSets[k]; });
     if (escena.tipo === "pasillo") {
       const P = PASILLOS[escena.i];
       P.vitrinas.forEach((v) => {
@@ -1029,7 +1295,49 @@
           : v.colgante ? `<small>Próximamente: Aesthetic Fest, 11–23 dic</small><b>${esc(t.letreroCorto || t.nombre)}</b>`
           : `<b>${esc(t.letreroCorto || t.nombre)}</b>`;
         if (v.colgante) s.addEventListener("click", (e) => { if (movido) return; e.stopPropagation(); entrar(t.id); });
+        if (t.id === "matteo" && pucoPremiumActivo()) {
+          s.classList.add("premium");
+          s.insertAdjacentHTML("afterbegin", `<span class="premium-badge">Premium</span>`);
+          if (PUCO_PREMIUM.vitrinaDestacada !== false && v.vitrina) {
+            const frame = document.createElement("div");
+            frame.className = "vitrina-premium";
+            frame.setAttribute("aria-hidden", "true");
+            Object.assign(frame.style, { left: v.vitrina.x + "%", top: v.vitrina.y + "%", width: v.vitrina.w + "%", height: v.vitrina.h + "%" });
+            const temp = pucoTemporada();
+            if (temp && temp.titulo) {
+              frame.innerHTML = `<div class="vitrina-temp"><b>${esc(temp.titulo)}</b>${temp.subtitulo ? `<span>${esc(temp.subtitulo)}</span>` : ""}</div>`;
+            }
+            spots.appendChild(frame);
+          }
+        }
         spots.appendChild(s);
+        if (t.id === "matteo" && pucoPremiumActivo() && PUCO_PREMIUM.hologramas !== false) pintarHologramas(spots, v, t, "puco");
+        if (t.id === "amigurumis" && amiPremiumActivo()) {
+          s.classList.add("premium");
+          s.insertAdjacentHTML("afterbegin", `<span class="premium-badge">Premium</span>`);
+          if (AMIGURUMIS_PREMIUM.vitrinaDestacada !== false) {
+            /* Recorte del carrito en pasillo-1.jpg (px 220,426,216×226 de 1280×720),
+               colocado con las mismas fracciones para que el drop-shadow no se desregistre. */
+            const wrap = document.createElement("div");
+            wrap.className = "kiosko-cutout";
+            wrap.setAttribute("aria-hidden", "true");
+            wrap.innerHTML = `<img src="assets/img/tiendas/ami-carrito-cutout.png?v=20261118g" alt="" draggable="false">`;
+            spots.appendChild(wrap);
+          }
+          if (AMIGURUMIS_PREMIUM.hologramas !== false) pintarHologramas(spots, v, t, "ami");
+        }
+        if (t.id === "consultorio" && romaPremiumActivo()) {
+          s.classList.add("premium");
+          s.insertAdjacentHTML("afterbegin", `<span class="premium-badge">Premium</span>`);
+          if (ROMA_PREMIUM.vitrinaDestacada !== false && v.vitrina) {
+            const frame = document.createElement("div");
+            frame.className = "vitrina-premium roma-premium";
+            frame.setAttribute("aria-hidden", "true");
+            Object.assign(frame.style, { left: v.vitrina.x + "%", top: v.vitrina.y + "%", width: v.vitrina.w + "%", height: v.vitrina.h + "%" });
+            spots.appendChild(frame);
+          }
+          if (ROMA_PREMIUM.hologramas !== false) pintarHologramas(spots, v, t, "roma");
+        }
         if (t.enConstruccion && !v.colgante) {
           const ribbon = document.createElement("div");
           ribbon.className = "vitrina-cinta" + (t.id === "convenciones" ? " fest" : "");
@@ -1055,6 +1363,7 @@
         spots.appendChild(b);
       });
       ajustarLetreros();
+      iniciarHologramas();
       /* Sin botón "Seguir al Pasillo…" en el piso: ya está "Seguir caminando" abajo a la derecha (y el aviso de deslizar lo tapaba). */
       return;
     }
@@ -1174,13 +1483,24 @@
     const t = tiendaActual(), nav = $("#roomNav");
     document.body.classList.toggle("en-tienda", !!t);
     document.body.classList.toggle("tienda-puco", !!(t && t.id === "matteo"));
+    document.body.classList.toggle("puco-premium", pucoPremiumActivo());
     document.body.classList.toggle("lux", !!(t && t.soloCita));
     document.body.classList.toggle("en-cartelera", !!(t && t.turismo));
     document.body.classList.toggle("en-evento", !!(t && t.evento));
     const hud = document.getElementById("pucoHud");
     if (hud) hud.hidden = !(t && t.id === "matteo");
     const dest = document.getElementById("pucoDestacados");
-    if (dest) dest.hidden = !(t && t.id === "matteo");
+    if (dest) {
+      dest.hidden = !(t && t.id === "matteo");
+      dest.classList.toggle("vitrina-destacada", !!(t && t.id === "matteo" && pucoPremiumActivo() && PUCO_PREMIUM.vitrinaDestacada !== false));
+    }
+    const tb = document.getElementById("pucoTempBanner");
+    const temp = pucoTemporada();
+    if (tb) {
+      const show = !!(t && t.id === "matteo" && temp && temp.titulo);
+      tb.hidden = !show;
+      if (show) tb.innerHTML = `<b>${esc(temp.titulo)}</b>${temp.subtitulo ? `<span>${esc(temp.subtitulo)}</span>` : ""}`;
+    }
     const sem = document.getElementById("pucoSemana");
     if (sem) sem.hidden = !(t && t.id === "matteo");
     if (typeof window.pucoPintarSticky === "function") window.pucoPintarSticky();
@@ -1518,6 +1838,26 @@
       fetch(endpoint, { method: "POST", headers: { "Content-Type": "application/json", Accept: "application/json" }, body, keepalive: true, mode: "cors" }).catch(() => {});
     } catch (e) { /* nunca bloquear WhatsApp */ }
   }
+
+  if ($("#ckPaypalPagar")) $("#ckPaypalPagar").onclick = () => {
+    if (!paypalPago) return;
+    const form = document.createElement("form");
+    form.method = "post";
+    form.action = "https://www.paypal.com/cgi-bin/webscr";
+    form.target = "_blank";
+    form.acceptCharset = "UTF-8";
+    Object.keys(paypalPago).forEach((k) => {
+      const input = document.createElement("input");
+      input.type = "hidden";
+      input.name = k;
+      input.value = paypalPago[k];
+      form.appendChild(input);
+    });
+    document.body.appendChild(form);
+    form.submit();
+    form.remove();
+  };
+
   if ($("#ckYaPague")) $("#ckYaPague").onclick = () => {
     if (!pedidoActual) return;
     const { g, nro, tid } = pedidoActual;

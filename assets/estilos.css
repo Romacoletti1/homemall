@@ -323,6 +323,7 @@ body.lux .roominfo .reg a{color:#8c6d2f}
 .letrero.prox{color:#7a5a1e}
 .letrero.prox b{font-style:italic}
 .letrero.kiosko{background:linear-gradient(180deg,#fff4f6,#f6dfe4);color:#7a5a7e;border:1px solid #e8b4b8;border-radius:999px;padding:.35em .6em;text-shadow:none;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.hotspot.kiosk{z-index:5}
 .hotspot.kiosk .dot{background:#e8b4b8}
 .roominfo .aviso{font-size:12px;opacity:.92;margin-top:6px;max-width:34ch;line-height:1.35}
 /* buscador laboratorio */
@@ -858,6 +859,17 @@ button.primary.disabled,button.primary:disabled{opacity:.55;cursor:not-allowed;f
 #ckResumen .cklinea{display:flex;justify-content:space-between;gap:10px}
 #ckResumen .cklinea.cli{color:#6b5f55;border-top:1px solid #eadccb;padding-top:8px;margin-top:4px}
 #ckYaPague.sent{opacity:.95}
+
+/* PuCo checkout: Yape and PayPal side by side when the drawer is wide enough */
+.ck-pagos{display:grid;gap:12px;margin-bottom:12px}
+.ck-pagos .pgbox{margin-bottom:0}
+.paypal-btn{
+  appearance:none;border:0;cursor:pointer;width:100%;
+  font:inherit;font-weight:800;font-size:14px;line-height:1.25;
+  color:#fff;background:#003087;border-radius:12px;padding:12px 14px;
+}
+.paypal-btn:hover{background:#012b73}
+.paypal-tc{display:block;margin-top:4px;font-size:12px;font-weight:600;color:#6b5f55}
 
 /* ========== PuCo Tech: vitrinas, súper ofertas, envío, HUD ========== */
 body.tienda-puco .roominfo{display:none}
@@ -1437,3 +1449,337 @@ body.tienda-puco .puco-destacados .puco-semana{
   .puco-prota .prota-body strong{font-size:15px}
   .puco-prota .prota-body b{font-size:22px}
 }
+
+
+/* ===== PuCo Tech Premium: vitrina, temporada, hologramas en el pasillo ===== */
+.letrero.placa.premium{overflow:visible;box-shadow:inset 0 0 0 calc(var(--pw)*.0022) #fbf5e6,inset 0 0 0 calc(var(--pw)*.0032) #c9a24a,0 0 calc(var(--pw)*.018) rgba(201,162,74,.55),0 8px 20px rgba(20,14,10,.22)}
+.letrero.premium .premium-badge{
+  position:absolute;top:0;left:50%;transform:translate(-50%,-58%);
+  z-index:2;pointer-events:none;
+  font-family:"Cormorant Garamond",Georgia,serif;font-weight:600;
+  font-size:calc(var(--pw)*.0072);letter-spacing:.28em;text-transform:uppercase;
+  color:#6e5218;background:linear-gradient(180deg,#fff8e4,#e8d08a 55%,#c9a24a);
+  border:1px solid #9c7426;border-radius:999px;
+  padding:.18em .7em .14em;line-height:1.15;white-space:nowrap;
+  box-shadow:0 2px 8px rgba(80,58,22,.28),inset 0 1px 0 rgba(255,255,255,.7);
+}
+.vitrina-premium{
+  position:absolute;z-index:2;pointer-events:none;border-radius:3px;
+  box-shadow:
+    inset 0 0 0 1px rgba(247,231,168,.7),
+    inset 0 0 0 3px rgba(80,58,22,.38),
+    inset 0 0 0 4px rgba(201,162,74,.9),
+    0 0 16px rgba(201,162,74,.4),
+    0 0 36px rgba(201,162,74,.18);
+}
+.vitrina-premium::before{
+  content:"";position:absolute;inset:6px;border:1px solid rgba(247,231,168,.28);pointer-events:none;border-radius:2px;
+}
+.vitrina-temp{
+  position:absolute;left:5%;right:5%;top:2.6%;
+  text-align:center;pointer-events:none;
+  background:linear-gradient(180deg,rgba(250,246,238,.92),rgba(244,236,220,.86));
+  border:1px solid rgba(201,162,74,.55);border-radius:4px;
+  padding:.28em .4em .32em;color:#5a3d12;
+  box-shadow:0 4px 12px rgba(20,14,10,.2);
+  font-family:"Cormorant Garamond",Georgia,serif;line-height:1.15;
+}
+.vitrina-temp b{display:block;font-size:calc(var(--pw)*.011);font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#7a5c1e}
+.vitrina-temp span{display:block;font-family:var(--sans);font-size:calc(var(--pw)*.0072);letter-spacing:.02em;color:#5a4330;margin-top:.1em;font-weight:600;text-transform:none}
+
+.puco-holos{
+  position:absolute;z-index:5;pointer-events:none;
+  opacity:0;visibility:hidden;
+  transition:opacity .45s ease,visibility .45s;
+}
+.puco-holos.on{opacity:1;visibility:visible;pointer-events:none}
+.puco-holo-slot{
+  position:absolute;width:54%;pointer-events:auto;
+  transition:opacity .26s ease,transform .26s ease;
+}
+.puco-holo-slot.s0{left:50%;top:16%;width:54%;transform:translateX(-50%)}
+.puco-holo-slot.s1{display:none}
+.puco-holo-slot.swap, .puco-holo-slot.s0.swap{opacity:0;transform:translateX(-50%) translateY(6px)}
+.puco-holo{
+  position:relative;display:flex;flex-direction:column;align-items:center;
+  width:100%;padding:5px;text-align:center;cursor:pointer;
+  color:#f4f0e5;border-radius:12px;overflow:hidden;
+  background:linear-gradient(180deg,rgba(180,230,240,.2),rgba(18,28,34,.42) 55%,rgba(40,32,16,.38));
+  border:1px solid rgba(170,230,240,.5);
+  box-shadow:0 0 10px rgba(120,220,230,.4),0 0 22px rgba(201,162,74,.28),inset 0 0 12px rgba(180,240,255,.12);
+  animation:holo-float 4.6s ease-in-out infinite;
+  transform-origin:50% 80%;
+}
+.puco-holo-slot.s1 .puco-holo{animation-duration:5.2s;animation-delay:-1.6s}
+.puco-holo.promo{padding:12px 10px 11px;min-height:4.8em;justify-content:center}
+.puco-holo .holo-etq{
+  font-family:"Cormorant Garamond",Georgia,serif;font-size:9px;font-weight:700;
+  letter-spacing:.14em;text-transform:uppercase;color:#e9cd7c;
+  text-shadow:0 0 8px rgba(201,162,74,.6);margin-bottom:3px;
+}
+.puco-holo .holo-fig, .puco-holo picture.holo-fig, .puco-holo img{
+  display:block;width:auto;max-width:100%;height:78px;object-fit:contain;margin:0 auto;
+  filter:drop-shadow(0 0 8px rgba(120,230,240,.75)) drop-shadow(0 0 4px rgba(201,162,74,.45));
+  opacity:.95;
+}
+.puco-holo .holo-etq, .puco-holo .holo-precio, .puco-holo.promo small{display:none}
+.puco-holo .holo-cap{padding:3px 4px 2px}
+.puco-holo .holo-cap strong{color:#f7f4ea;text-shadow:0 0 6px rgba(80,200,220,.45)}
+.puco-holo .holo-cap em{color:#e9cd7c;text-shadow:0 0 6px rgba(201,162,74,.5)}
+.puco-holo .holo-precio .precio-lista{opacity:.7;font-weight:500;margin-right:.2em}
+.puco-holo .holo-precio .dto-badge{display:inline-block;margin-left:.15em;font-size:9px;padding:0 4px;border-radius:4px;background:rgba(201,162,74,.25);border:1px solid rgba(233,205,124,.45)}
+.puco-holo.promo strong{font-family:"Cormorant Garamond",Georgia,serif;font-size:16px;font-weight:700;letter-spacing:.04em;color:#e9cd7c;max-height:none}
+.puco-holo.promo small{display:block;margin-top:3px;font-size:10px;color:#d9f4f8;font-weight:600}
+.puco-holo .holo-scan{
+  position:absolute;inset:0;pointer-events:none;
+  background:repeating-linear-gradient(180deg,transparent 0 2px,rgba(180,240,255,.1) 2px 3px);
+  background-size:100% 200%;
+  animation:holo-scan 5s linear infinite;
+  mix-blend-mode:screen;opacity:.7;
+}
+@keyframes holo-float{
+  0%,100%{transform:translateY(0) rotate(-1.6deg)}
+  50%{transform:translateY(-8px) rotate(1.8deg)}
+}
+@keyframes holo-scan{to{background-position:0 200%}}
+
+#pucoTempBanner{
+  display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 10px;
+  margin:0 0 8px;padding:7px 11px;
+  background:linear-gradient(180deg,#fffdf6,#efe1c2);
+  border:1px solid rgba(201,162,74,.6);border-radius:10px;color:#5a3d12;
+  font-family:"Cormorant Garamond",Georgia,serif;
+}
+#pucoTempBanner[hidden]{display:none}
+#pucoTempBanner b{font-size:15px;letter-spacing:.12em;text-transform:uppercase;color:#7a5c1e}
+#pucoTempBanner span{font-family:var(--sans);font-size:12px;font-weight:600;color:#5a4330;letter-spacing:0;text-transform:none}
+
+body.tienda-puco .puco-destacados.vitrina-destacada{
+  position:relative;
+  border:1px solid rgba(201,162,74,.7);
+  box-shadow:0 0 0 1px rgba(255,248,230,.7),0 8px 28px rgba(80,58,22,.1),0 0 22px rgba(201,162,74,.16);
+  border-radius:16px;padding:10px 10px 12px;background:linear-gradient(180deg,#fffdf8,#faf6ee 40%,#f3ead6);
+}
+.puco-vitrina-head{display:none;align-items:center;gap:8px;margin:0 2px 8px}
+body.tienda-puco .puco-destacados.vitrina-destacada .puco-vitrina-head{display:flex}
+.puco-vitrina-head .premium-badge{
+  font-family:"Cormorant Garamond",Georgia,serif;font-weight:600;
+  font-size:10px;letter-spacing:.24em;text-transform:uppercase;
+  color:#6e5218;background:linear-gradient(180deg,#fff8e4,#e8d08a 55%,#c9a24a);
+  border:1px solid #9c7426;border-radius:999px;padding:.2em .7em;line-height:1.2;
+}
+.puco-vitrina-kicker{
+  font-family:"Cormorant Garamond",Georgia,serif;font-size:18px;font-weight:600;
+  color:#7a5c1e;letter-spacing:.04em;margin:0;
+}
+
+@media (max-width:839px){
+  .puco-holo-slot.s0{width:62%;top:14%}
+  .puco-holo{padding:5px}
+  .puco-holo .holo-fig, .puco-holo picture.holo-fig, .puco-holo img{height:64px}
+  .vitrina-temp span{display:none}
+  .vitrina-temp b{font-size:calc(var(--pw)*.014)}
+}
+@media (max-width:720px){
+  .puco-vitrina-kicker{font-size:16px}
+  #pucoTempBanner{margin:0 0 6px;padding:6px 9px}
+  #pucoTempBanner b{font-size:13px}
+  #pucoTempBanner span{font-size:11px}
+  /* Light on mobile: no extra filters on the frame. */
+  .vitrina-premium{box-shadow:inset 0 0 0 1px rgba(247,231,168,.7),inset 0 0 0 3px rgba(201,162,74,.85),0 0 14px rgba(201,162,74,.35)}
+  .vitrina-premium.kiosko-premium{box-shadow:none;background:none;border-radius:0}
+}
+@media (prefers-reduced-motion: reduce){
+  .puco-holo, .puco-holo .holo-scan, .puco-holo-slot{animation:none !important;transition:none !important}
+  .puco-holos{transition:none}
+  .hotspot .dot{animation:none}
+}
+
+@media (min-width:900px){
+  body.tienda-puco .puco-destacados.vitrina-destacada{
+    display:grid;
+    grid-template-columns:minmax(280px,1.2fr) minmax(300px,1fr);
+    grid-template-areas:"banner banner" "head head" "semana protas";
+    gap:8px 14px;align-items:start;
+    margin:0 16px 8px;padding:8px 10px 10px;
+  }
+  body.tienda-puco .puco-destacados.vitrina-destacada #pucoTempBanner{grid-area:banner;margin:0;padding:5px 10px}
+  body.tienda-puco .puco-destacados.vitrina-destacada .puco-vitrina-head{grid-area:head;margin:0}
+  body.tienda-puco .puco-destacados.vitrina-destacada .puco-semana{grid-area:semana;margin:0}
+  body.tienda-puco .puco-destacados.vitrina-destacada .puco-protas{grid-area:protas;min-width:0}
+  body.tienda-puco .puco-destacados.vitrina-destacada .puco-semana img{max-height:148px}
+  body.tienda-puco .puco-destacados.vitrina-destacada .puco-prota .prota-photo{aspect-ratio:auto;height:108px;max-height:108px}
+  body.tienda-puco .puco-destacados.vitrina-destacada .puco-prota .prota-body b{font-size:18px}
+  body.tienda-puco .puco-destacados.vitrina-destacada .puco-prota .prota-body strong{font-size:13px}
+}
+
+
+/* Shared hallway hologram visibility */
+.holo-set{
+  position:absolute;z-index:5;pointer-events:none;
+  opacity:0;visibility:hidden;
+  transition:opacity .45s ease,visibility .45s;
+}
+.holo-set.on{opacity:1;visibility:visible}
+.holo-slot{
+  position:absolute;width:54%;pointer-events:auto;
+  transition:opacity .26s ease,transform .26s ease;
+}
+.holo-slot.swap{opacity:0;transform:translateY(6px)}
+
+/* Small name + motivo under each featured hallway photo */
+.holo-cap{
+  display:block;width:100%;padding:3px 5px 2px;text-align:center;
+  position:relative;z-index:2;pointer-events:none;
+}
+.holo-cap strong{
+  display:block;overflow:hidden;font-family:var(--sans);font-size:9px;font-weight:700;
+  line-height:1.2;max-height:2.4em;
+  display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;
+}
+.holo-cap em{
+  display:block;font-style:normal;font-size:7.5px;font-weight:700;
+  letter-spacing:.07em;text-transform:uppercase;margin-top:2px;line-height:1.25;
+  overflow:hidden;max-height:2.5em;
+}
+
+/* Amigurumis Premium: gold frame on the cart + crochet holograms */
+.letrero.kiosko.premium{
+  overflow:visible;
+  background:linear-gradient(180deg,#fffdf8,#f6e6d8 55%,#f3d5d8);
+  color:#5a3f12;
+  border:1px solid #c9a24a;
+  box-shadow:0 0 0 1px #fff8e8,0 0 16px rgba(201,162,74,.55),0 6px 16px rgba(20,14,10,.22);
+  z-index:6;
+}
+.letrero.kiosko.premium small{color:#8a6420}
+/* Recorte del carrito (misma foto, misma escala) + drop-shadow dorado suave. */
+.kiosko-cutout{
+  position:absolute;left:0;top:0;width:100%;height:100%;
+  pointer-events:none;z-index:2;
+  filter:
+    drop-shadow(0 0 1px rgba(247,231,168,.95))
+    drop-shadow(0 0 2px rgba(201,162,74,.7))
+    drop-shadow(0 0 5px rgba(201,162,74,.4));
+}
+.pano .kiosko-cutout img{
+  position:absolute;display:block;pointer-events:none;user-select:none;
+  left:calc(100% * 220 / 1280);
+  top:calc(100% * 426 / 720);
+  width:calc(100% * 216 / 1280);
+  height:calc(100% * 226 / 720);
+}
+.ami-holos{z-index:8}
+/* Flota encima del toldo, no tapa la placa ni el distintivo PREMIUM. */
+.ami-holo-slot.s0{left:50%;top:-32%;width:50%;transform:translateX(-50%)}
+.ami-holo-slot.s1{display:none}
+.ami-holo-slot.s0.swap{opacity:0;transform:translateX(-50%) translateY(6px)}
+.ami-holo{
+  position:relative;display:flex;flex-direction:column;align-items:center;
+  width:100%;padding:7px;text-align:center;cursor:pointer;
+  color:#5a3a48;border-radius:16px 16px 18px 18px;overflow:visible;
+  background:linear-gradient(180deg,rgba(255,248,246,.94),rgba(255,232,232,.86));
+  border:1.5px solid #d4a0a8;
+  outline:1px dashed #b87888;outline-offset:3px;
+  box-shadow:0 0 0 6px rgba(255,244,246,.65),0 0 14px rgba(232,180,184,.5),0 8px 18px rgba(90,50,60,.18);
+  animation:ami-float 5.2s ease-in-out infinite;
+  transform-origin:50% 90%;
+}
+.ami-holo-slot.s1 .ami-holo{animation-duration:6s;animation-delay:-2s}
+.ami-holo::before{
+  content:"";position:absolute;left:8px;right:8px;top:-8px;height:10px;pointer-events:none;
+  background:radial-gradient(circle at 50% 100%,#e8b4b8 5px,transparent 6px) 0 0 / 12px 10px repeat-x;
+}
+.ami-holo .holo-etq{
+  font-family:"Cormorant Garamond",Georgia,serif;font-size:9px;font-weight:700;
+  letter-spacing:.14em;text-transform:uppercase;color:#9a5a6a;margin-bottom:3px;
+}
+.ami-holo .holo-fig, .ami-holo img{
+  display:block;width:100%;max-width:100%;height:76px;object-fit:cover;margin:0 auto;
+  border-radius:10px;box-shadow:0 2px 6px rgba(122,90,126,.25);
+}
+.ami-holo .holo-etq, .ami-holo .holo-precio{display:none}
+.ami-holo .holo-cap{padding:3px 5px 2px}
+.ami-holo .holo-cap strong{color:#5a3a48}
+.ami-holo .holo-cap em{color:#9a5a6a}
+.ami-holo .holo-yarn{
+  position:absolute;inset:0;pointer-events:none;opacity:.4;border-radius:inherit;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='40' height='24' viewBox='0 0 40 24'><g fill='none' stroke='%23c98a96' stroke-width='1.2' stroke-linecap='round'><path d='M1 14c0-6 5-6 7 0s7 6 7 0 5-6 7 0 7 6 7 0 5-6 7 0'/><path d='M8 14c0 5 7 5 7 0M22 14c0 5 7 5 7 0'/></g></svg>");
+  background-size:40px 24px;mix-blend-mode:multiply;
+}
+@keyframes ami-float{
+  0%,100%{transform:translateY(0) rotate(-0.8deg)}
+  50%{transform:translateY(-7px) rotate(1deg)}
+}
+
+/* Roma Coletti Premium: gold-framed floating images with pedestal spotlight */
+.letrero.placa.lux.premium{overflow:visible}
+.vitrina-premium.roma-premium{z-index:2}
+.roma-holos{z-index:6}
+.roma-holo-slot.s0{left:50%;top:8%;width:50%;transform:translateX(-50%)}
+.roma-holo-slot.s1{display:none}
+.roma-holo-slot.s0.swap{opacity:0;transform:translateX(-50%) translateY(6px)}
+.roma-holo{
+  position:relative;display:flex;flex-direction:column;align-items:center;
+  width:100%;padding:0 0 18px;background:transparent;border:0;cursor:pointer;
+  transform-origin:50% 80%;
+  animation:roma-turn 16s ease-in-out infinite;
+  filter:drop-shadow(0 10px 16px rgba(40,28,12,.28));
+}
+.roma-holo-slot.s1 .roma-holo{animation-duration:19s;animation-delay:-5s}
+.roma-frame{
+  position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;
+  width:100%;overflow:hidden;background:#faf6ee;
+  border:2px solid #c9a24a;
+  box-shadow:0 0 0 1px #f7e7a8, inset 0 0 0 1px rgba(155,116,38,.35), 0 0 18px rgba(201,162,74,.4);
+  border-radius:3px;
+  color:#5a3d12;
+}
+.roma-frame img, .roma-frame .holo-fig{
+  display:block;width:100%;height:108px;object-fit:cover;object-position:center;
+}
+.roma-frame .holo-etq{display:none}
+.roma-frame .holo-cap{
+  padding:4px 6px 5px;
+  background:linear-gradient(180deg,#fffdf8,#f3ead6);
+  border-top:1px solid rgba(201,162,74,.35);
+}
+.roma-frame .holo-cap strong{
+  font-family:"Cormorant Garamond",Georgia,serif;font-size:11px;font-weight:600;
+  letter-spacing:.02em;color:#5a3d12;max-height:none;
+}
+.roma-frame .holo-cap em{color:#8a6420}
+.roma-beam{
+  position:absolute;z-index:1;left:50%;bottom:-2px;width:155%;height:85%;
+  transform:translateX(-50%);
+  background:linear-gradient(180deg,rgba(247,231,168,.2) 0%,rgba(247,231,168,.75) 20%,rgba(201,162,74,.4) 50%,transparent 82%);
+  clip-path:polygon(26% 0,74% 0,100% 100%,0 100%);
+  pointer-events:none;filter:blur(.5px);
+}
+.roma-pedestal{
+  position:absolute;z-index:3;left:50%;bottom:4px;width:52%;height:6px;
+  transform:translateX(-50%);
+  border-radius:2px;
+  background:linear-gradient(180deg,#fff6d0,#e8c86a 40%,#c9a24a 70%,#9c7426);
+  box-shadow:0 -10px 22px 7px rgba(247,231,168,.8),0 0 26px 8px rgba(201,162,74,.55);
+  pointer-events:none;
+}
+@keyframes roma-turn{
+  0%,100%{transform:perspective(520px) rotateY(-18deg) translateY(0)}
+  50%{transform:perspective(520px) rotateY(18deg) translateY(-7px)}
+}
+
+@media (max-width:839px){
+  .ami-holo-slot.s0{width:56%;top:-48%}
+  .roma-holo-slot.s0{width:60%;top:8%}
+  .roma-frame img, .roma-frame .holo-fig{height:88px}
+  .ami-holo .holo-fig, .ami-holo img{height:62px}
+  .roma-beam{filter:none;height:60%}
+}
+@media (prefers-reduced-motion: reduce){
+  .ami-holo, .ami-holo .holo-yarn, .roma-holo, .holo-slot, .puco-holo, .puco-holo .holo-scan{
+    animation:none !important;transition:none !important;
+  }
+  .holo-set{transition:none}
+}
+
